@@ -1,0 +1,101 @@
+---
+// Experience & Education Timeline
+
+const experiences = [
+  {
+    period: "2023 — Present",
+    periodKey: "experience.e1.period",
+    title: "DevOps & Infrastructure Engineer",
+    titleKey: "experience.e1.title",
+    company: "Freelance & Homelab Operations",
+    companyKey: "experience.e1.company",
+    description: "Designing, provisioning, and maintaining containerized production environments. Managing automated CI/CD deployment pipelines, reverse proxy routing, and self-hosted workflow systems with n8n and Docker.",
+    descKey: "experience.e1.desc",
+    tags: ["Docker", "Linux", "n8n", "CI/CD", "Reverse Proxy"],
+  },
+  {
+    period: "2022 — 2023",
+    periodKey: "experience.e2.period",
+    title: "Fullstack Web Developer",
+    titleKey: "experience.e2.title",
+    company: "Contract & Client Projects",
+    companyKey: "experience.e2.company",
+    description: "Engineered robust web applications with Laravel and MySQL. Implemented RESTful APIs, secure session management, and granular role-based access control (RBAC).",
+    descKey: "experience.e2.desc",
+    tags: ["Laravel", "PHP", "MySQL", "REST API", "Tailwind CSS"],
+  },
+  {
+    period: "2019 — 2023",
+    periodKey: "experience.e3.period",
+    title: "B.S. in Computer Science (S.Kom)",
+    titleKey: "experience.e3.title",
+    company: "Universitas",
+    companyKey: "experience.e3.company",
+    description: "Comprehensive foundation in computer systems, operating systems, distributed architectures, computer networking, algorithms, and software engineering principles.",
+    descKey: "experience.e3.desc",
+    tags: ["Computer Science", "Operating Systems", "Networking", "Databases"],
+  },
+  {
+    period: "2024",
+    periodKey: "experience.e4.period",
+    title: "Container Orchestration Specialist",
+    titleKey: "experience.e4.title",
+    company: "Self-Directed Practical Engineering",
+    companyKey: "experience.e4.company",
+    description: "Extensive hands-on implementation of multi-container networking, zero-trust tunnel routing, automated backup procedures, and continuous observability.",
+    descKey: "experience.e4.desc",
+    tags: ["Docker Compose", "Cloudflare Tunnels", "Uptime Kuma", "Grafana"],
+  },
+];
+---
+
+<section id="experience" class="py-28 relative">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="mb-16 section-fade" id="experience-header">
+      <span class="section-label mb-5 inline-flex">
+        <span class="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600"></span>
+        <span data-i18n="experience.tag">Background</span>
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-5 mb-3 transition-colors" data-i18n="experience.title">
+        Experience & Milestones
+      </h2>
+      <p class="text-zinc-600 dark:text-zinc-400 max-w-lg text-[15px] leading-relaxed transition-colors" data-i18n="experience.subtitle">
+        Career path, production engineering experience, and technical milestones.
+      </p>
+    </div>
+
+    <!-- Timeline Layout -->
+    <div class="relative border-l border-zinc-200 dark:border-zinc-800/80 ml-3 sm:ml-4 pl-6 sm:pl-8 space-y-12 section-fade transition-colors" id="timeline">
+      {experiences.map((item, i) => (
+        <div class="relative group" id={`timeline-item-${i}`}>
+          <!-- Dot -->
+          <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-3 h-3 rounded-full bg-white dark:bg-zinc-800 border border-zinc-400 dark:border-zinc-600 ring-4 ring-white dark:ring-zinc-950 group-hover:border-zinc-900 dark:group-hover:border-zinc-400 transition-colors"></div>
+
+          <!-- Content -->
+          <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-2">
+            <h3 class="text-base font-medium text-zinc-900 dark:text-zinc-100 tracking-tight transition-colors">
+              <span data-i18n={item.titleKey}>{item.title}</span>
+              <span class="text-zinc-500 font-normal text-sm ml-1 sm:ml-2">&middot; <span data-i18n={item.companyKey}>{item.company}</span></span>
+            </h3>
+            <span class="text-xs font-mono text-zinc-500" data-i18n={item.periodKey}>
+              {item.period}
+            </span>
+          </div>
+
+          <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl mb-4 transition-colors" data-i18n={item.descKey}>
+            {item.description}
+          </p>
+
+          <div class="flex flex-wrap gap-1.5">
+            {item.tags.map((tag) => (
+              <span class="text-xs font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 px-2 py-0.5 rounded transition-colors">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

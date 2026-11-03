@@ -1,0 +1,95 @@
+---
+// Hero Section Component
+---
+
+<section id="about" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-14">
+  <!-- Minimal ambient gradient -->
+  <div class="absolute inset-0 bg-gradient-to-b from-zinc-200/20 via-transparent to-transparent dark:from-zinc-900/10 pointer-events-none"></div>
+
+  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+    <!-- Available Badge -->
+    <div class="animate-fadeInUp mb-8 flex justify-center" id="hero-badge">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-xs font-medium transition-colors">
+        <span class="relative flex h-1.5 w-1.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
+          <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+        </span>
+        <span data-i18n="hero.badge">Available for opportunities</span>
+      </div>
+    </div>
+
+    <!-- Name -->
+    <h1 class="animate-fadeInUp delay-100 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-3 leading-[1.05] transition-colors" id="hero-name">
+      Satria Imaniar
+    </h1>
+
+    <!-- Headline -->
+    <div class="animate-fadeInUp delay-200 mb-6">
+      <p class="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 font-normal tracking-tight transition-colors" id="hero-headline" data-i18n="hero.headline">
+        DevOps Engineer &middot; Infrastructure &middot; Automation
+      </p>
+    </div>
+
+    <!-- Bio -->
+    <p class="animate-fadeInUp delay-300 max-w-xl mx-auto text-zinc-600 dark:text-zinc-400 text-base leading-relaxed mb-10 transition-colors" id="hero-bio" data-i18n="hero.bio">
+      Building resilient infrastructure and intelligent automation. Experienced with
+      Docker container orchestration, CI/CD pipelines, and event-driven workflow
+      automation using n8n and AI APIs. Focused on systems that are scalable,
+      observable, and genuinely reliable.
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="animate-fadeInUp delay-400 flex flex-col sm:flex-row items-center justify-center gap-3 mb-16" id="hero-ctas">
+      <a
+        href="#projects"
+        id="cta-projects"
+        class="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 font-medium rounded-lg text-sm transition-colors duration-150 shadow-sm"
+      >
+        <span data-i18n="hero.viewProjects">View Projects</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+
+      <a
+        href="/cv-satria-imaniar.pdf"
+        download
+        id="cta-cv"
+        class="flex items-center gap-2 px-5 py-2.5 bg-white/70 dark:bg-transparent text-zinc-700 dark:text-zinc-400 font-medium rounded-lg text-sm border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors duration-150"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span data-i18n="hero.downloadCv">Download CV</span>
+      </a>
+    </div>
+
+    <!-- Stats — inline separator style -->
+    <div class="animate-fadeInUp delay-500 flex items-center justify-center gap-0" id="hero-stats">
+      <div class="text-center px-6 sm:px-8">
+        <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-200 tracking-tight transition-colors">2+</div>
+        <div class="text-xs text-zinc-500 mt-0.5 tracking-wide font-mono" data-i18n="hero.statsExp">Years Exp.</div>
+      </div>
+      <div class="w-px h-8 bg-zinc-200 dark:bg-zinc-800 transition-colors"></div>
+      <div class="text-center px-6 sm:px-8">
+        <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-200 tracking-tight transition-colors">12+</div>
+        <div class="text-xs text-zinc-500 mt-0.5 tracking-wide font-mono" data-i18n="hero.statsProjects">Projects</div>
+      </div>
+      <div class="w-px h-8 bg-zinc-200 dark:bg-zinc-800 transition-colors"></div>
+      <div class="text-center px-6 sm:px-8">
+        <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-200 tracking-tight transition-colors">97%</div>
+        <div class="text-xs text-zinc-500 mt-0.5 tracking-wide font-mono" data-i18n="hero.statsUptime">Uptime</div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="animate-fadeInUp delay-600 mt-20 flex justify-center" id="scroll-indicator">
+      <a href="#skills" class="flex flex-col items-center gap-2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 transition-colors group">
+        <span class="text-[10px] tracking-widest uppercase font-mono" data-i18n="hero.scroll">Scroll</span>
+        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,77 @@
+---
+// Tech Stack & Skills Section
+
+const skillGroups = [
+  {
+    key: "skills.cat.infra",
+    defaultCategory: "Infrastructure & Cloud",
+    skills: ["Linux (Ubuntu)", "Docker", "Docker Compose", "Cloudflare Tunnel", "Nginx Proxy Manager", "Git & GitHub"],
+  },
+  {
+    key: "skills.cat.automation",
+    defaultCategory: "Automation & AI",
+    skills: ["n8n Automation", "REST API Integration", "Webhook Flows", "Prompt Engineering", "Gemini API", "Event-Driven Pipelines"],
+  },
+  {
+    key: "skills.cat.dev",
+    defaultCategory: "Development",
+    skills: ["Laravel / PHP", "JavaScript / Node.js", "Astro", "Tailwind CSS", "MySQL", "PostgreSQL", "REST API Design"],
+  },
+  {
+    key: "skills.cat.tools",
+    defaultCategory: "Tools & Observability",
+    skills: ["Portainer", "Homarr", "Uptime Kuma", "Grafana", "Prometheus", "GitHub Actions", "Bash Scripting", "SSL/TLS", "Traefik"],
+  },
+];
+---
+
+<section id="skills" class="py-28 relative">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="mb-16 section-fade" id="skills-header">
+      <span class="section-label mb-5 inline-flex">
+        <span class="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600"></span>
+        <span data-i18n="skills.tag">Stack</span>
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-5 mb-3 transition-colors" data-i18n="skills.title">
+        Skills & Expertise
+      </h2>
+      <p class="text-zinc-600 dark:text-zinc-400 max-w-md text-[15px] leading-relaxed transition-colors" data-i18n="skills.subtitle">
+        Tools and technologies I use to build, automate, and operate production systems.
+      </p>
+    </div>
+
+    <!-- Skill Groups -->
+    <div class="space-y-12 section-fade" id="skills-grid">
+      {skillGroups.map((group) => (
+        <div class="grid sm:grid-cols-[200px_1fr] gap-4 sm:gap-8 items-start">
+          <!-- Category label -->
+          <div class="pt-1">
+            <h3 class="text-xs font-mono font-medium text-zinc-500 uppercase tracking-widest" data-i18n={group.key}>
+              {group.defaultCategory}
+            </h3>
+          </div>
+          <!-- Pills -->
+          <div class="flex flex-wrap gap-2">
+            {group.skills.map((skill) => (
+              <span class="skill-pill">{skill}</span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Divider -->
+    <div class="mt-16 border-t border-zinc-200 dark:border-zinc-800/80 section-fade transition-colors"></div>
+
+    <!-- Additional tools footer row -->
+    <div class="mt-8 flex flex-wrap gap-2 section-fade" id="tech-badges">
+      <span class="text-[11px] font-mono text-zinc-500 uppercase tracking-widest self-center mr-2" data-i18n="skills.alsoUsed">
+        Also used
+      </span>
+      {["Python", "Redis", "Cron Jobs", "Watchtower", "Vaultwarden", "Bitwarden"].map(tech => (
+        <span class="skill-pill text-zinc-500 dark:text-zinc-400">{tech}</span>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,138 @@
+---
+// Web Applications & Client Projects Section
+const webProjects = [
+  {
+    title: "E-Skripsi Hub (Platform Akademik)",
+    titleKey: "webProjects.p1.title",
+    badge: "Academic Thesis Research & Production Platform",
+    badgeKey: "webProjects.p1.badge",
+    badgeColor: "emerald",
+    description: "Integrated online thesis management platform for faculty students and lecturers. Developed as a thesis research project and currently operating in active production.",
+    descKey: "webProjects.p1.desc",
+    tags: ["Laravel", "PHP", "MySQL", "Tailwind CSS", "REST API"],
+    demoUrl: "https://eskripsi-hub.kendalisuplai.com",
+    githubUrl: "https://github.com/SatriaImaniar",
+    index: 1,
+  },
+  {
+    title: "Bhayangkara Coffe (UMKM E-Commerce)",
+    titleKey: "webProjects.p2.title",
+    badge: "Commercial Web Application (First Paid Client)",
+    badgeKey: "webProjects.p2.badge",
+    badgeColor: "amber",
+    description: "Coffee product ordering web application designed for a local UMKM. Represents my first commercial client project for local business digitalization.",
+    descKey: "webProjects.p2.desc",
+    tags: ["JavaScript", "Vercel", "Tailwind CSS", "Web Design"],
+    demoUrl: "https://bhayangkara-coffe.vercel.app",
+    githubUrl: "https://github.com/SatriaImaniar/Bhayangkara-coffe",
+    index: 2,
+  },
+  {
+    title: "Firstbox Barber Shop (Booking System)",
+    titleKey: "webProjects.p3.title",
+    badge: "Modern UI & Service Booking Platform",
+    badgeKey: "webProjects.p3.badge",
+    badgeColor: "blue",
+    description: "Modern barbershop booking and service management platform crafted with an aesthetic, highly responsive, and user-friendly UI/UX.",
+    descKey: "webProjects.p3.desc",
+    tags: ["Laravel", "Blade", "Tailwind CSS", "UI/UX Design", "MySQL"],
+    demoUrl: undefined,
+    githubUrl: "https://github.com/satriaxx",
+    index: 3,
+  },
+];
+---
+
+<section id="web-projects" class="py-24 relative">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="mb-16 section-fade" id="web-projects-header">
+      <span class="section-label mb-5 inline-flex">
+        <span class="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600"></span>
+        <span data-i18n="webProjects.tag">Client & Web Apps</span>
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-5 mb-3 transition-colors" data-i18n="webProjects.title">
+        Web Applications & Client Projects
+      </h2>
+      <p class="text-zinc-600 dark:text-zinc-400 max-w-xl text-[15px] leading-relaxed transition-colors" data-i18n="webProjects.subtitle">
+        Selected production web platforms, commercial client applications, and academic systems built with modern web technologies.
+      </p>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade" id="web-projects-grid">
+      {webProjects.map((project) => (
+        <article
+          class="group relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-200 card-base"
+          id={`web-project-card-${project.index}`}
+        >
+          <div>
+            <!-- Badge / Subtitle meta -->
+            <div class="mb-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500"></span>
+                <span data-i18n={project.badgeKey}>{project.badge}</span>
+              </span>
+            </div>
+
+            <!-- Project Title -->
+            <h3
+              class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-950 dark:group-hover:text-white tracking-tight mb-3 transition-colors"
+              data-i18n={project.titleKey}
+            >
+              {project.title}
+            </h3>
+
+            <!-- Fluid Description -->
+            <p
+              class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6 transition-colors"
+              data-i18n={project.descKey}
+            >
+              {project.description}
+            </p>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 mb-6">
+              {project.tags.map((tag) => (
+                <span class="text-xs font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 px-2.5 py-0.5 rounded transition-colors">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <!-- Bottom Actions (Conditional Demo Langsung & Lihat Kode) -->
+          <div class="pt-4 border-t border-zinc-200/80 dark:border-zinc-800/50 flex items-center gap-2.5 transition-colors">
+            {project.demoUrl && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white dark:text-zinc-950 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white rounded-lg transition-colors shadow-sm"
+              >
+                <span data-i18n="webProjects.liveDemo">Live Demo</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            )}
+
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800/60 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700/50 transition-colors"
+              >
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span data-i18n="webProjects.viewCode">View Code</span>
+              </a>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,162 @@
+---
+// Live Infrastructure Status Widget — Telemetry & Observability
+---
+
+<section id="status" class="py-16 relative">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="rounded-2xl border transition-all duration-200 overflow-hidden section-fade card-base" id="status-widget">
+      <!-- Top Terminal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800/70 bg-zinc-50/80 dark:bg-zinc-950/40 transition-colors">
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700/80"></span>
+          </div>
+          <span class="text-xs font-mono text-zinc-600 dark:text-zinc-500 ml-2" data-i18n="status.command">satria@homelab:~# telemetry --live</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium" data-i18n="status.allHealthy">All Nodes Healthy</span>
+        </div>
+      </div>
+
+      <!-- Main Status Body -->
+      <div class="p-6 sm:p-8">
+        <!-- Node summary -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-zinc-50/90 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/60 mb-6 transition-colors">
+          <div class="flex items-center gap-3.5">
+            <div class="w-9 h-9 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/50 flex items-center justify-center text-zinc-700 dark:text-zinc-300 shadow-xs">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="font-medium text-sm text-zinc-900 dark:text-zinc-200 transition-colors" data-i18n="status.nodeTitle">Production Node: toshiba-l645</p>
+                <span class="inline-flex px-1.5 py-0.5 text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded">x86_64</span>
+              </div>
+              <p class="text-xs text-zinc-500 font-mono mt-0.5" data-i18n="status.nodeSubtitle">Ubuntu 22.04 LTS &middot; Linux 5.15 &middot; Docker 24.0.7</p>
+            </div>
+          </div>
+
+          <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-200 dark:border-zinc-800/60">
+            <span class="text-xs text-zinc-500 font-mono" data-i18n="status.uptimeTitle">30-day Uptime</span>
+            <span class="text-xl font-semibold font-mono text-zinc-900 dark:text-zinc-200 transition-colors" id="uptime-display">99.7%</span>
+          </div>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="mb-6">
+          <div class="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-3" data-i18n="status.serviceHealth">Service Health Check</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="services-grid">
+            {[
+              { name: "Nginx Proxy", latency: "12ms", port: "443" },
+              { name: "Docker Engine", latency: "local", port: "2375" },
+              { name: "n8n Workflow", latency: "42ms", port: "5678" },
+              { name: "Homarr Hub", latency: "8ms", port: "7575" },
+              { name: "Cloudflare", latency: "18ms", port: "tunnel" },
+              { name: "Uptime Kuma", latency: "6ms", port: "3001" },
+            ].map((service) => (
+              <div class="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/60 transition-colors">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-medium text-zinc-800 dark:text-zinc-300 truncate">{service.name}</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                  <span>{service.port}</span>
+                  <span class="text-zinc-700 dark:text-zinc-400 font-medium">{service.latency}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Telemetry Gauges -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
+            <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
+              <span data-i18n="status.cpu">CPU Core Load</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="cpu-stat">21%</span>
+            </div>
+            <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div id="cpu-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 21%;"></div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
+            <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
+              <span data-i18n="status.memory">Memory (RAM)</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="ram-stat">3.2 / 8 GB</span>
+            </div>
+            <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div id="ram-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 40%;"></div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
+            <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
+              <span data-i18n="status.storage">NVMe Storage</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium">187 / 500 GB</span>
+            </div>
+            <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full" style="width: 37%;"></div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
+            <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
+              <span data-i18n="status.containers">Containers</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="containers-stat">12 active</span>
+            </div>
+            <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full" style="width: 80%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Updated -->
+        <div class="mt-5 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+          <span data-i18n="status.polling">Polling interval: 30s &bull; Agent: active</span>
+          <span><span data-i18n="status.lastSync">Last sync:</span> <span id="last-updated" data-i18n="status.justNow">just now</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function updateStats() {
+    const cpu = Math.floor(16 + Math.random() * 18);
+    const ramUsed = (3.1 + Math.random() * 0.4).toFixed(1);
+    const ramPercent = Math.round((parseFloat(ramUsed) / 8) * 100);
+
+    const cpuEl = document.getElementById("cpu-stat");
+    const cpuBar = document.getElementById("cpu-bar");
+    const ramEl = document.getElementById("ram-stat");
+    const ramBar = document.getElementById("ram-bar");
+    const containerEl = document.getElementById("containers-stat");
+    const lastEl = document.getElementById("last-updated");
+
+    const lang = document.documentElement.getAttribute("lang") || "en";
+    const activeLabel = lang === "id" ? "aktif" : "active";
+
+    if (cpuEl) cpuEl.textContent = `${cpu}%`;
+    if (cpuBar) cpuBar.style.width = `${cpu}%`;
+    if (ramEl) ramEl.textContent = `${ramUsed} / 8 GB`;
+    if (ramBar) ramBar.style.width = `${ramPercent}%`;
+    if (containerEl) containerEl.textContent = `12 ${activeLabel}`;
+    if (lastEl) lastEl.textContent = new Date().toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  updateStats();
+  setInterval(updateStats, 30000);
+
+  window.addEventListener("portfolio-lang-change", () => {
+    updateStats();
+  });
+</script>

@@ -1,0 +1,248 @@
+---
+// Base Layout
+import "../styles/global.css";
+import { translations } from "../i18n/translations";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = "Satria Imaniar — DevOps, Automation & Fullstack Developer",
+  description = "Professional portfolio of Satria Imaniar. DevOps Engineer, Infrastructure & Workflow Automation Specialist with Docker, CI/CD, n8n, and Laravel.",
+  ogImage = "/og-image.png",
+} = Astro.props;
+
+const canonicalURL = Astro.url;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Satria Imaniar" />
+    <meta name="keywords" content="DevOps, Docker, CI/CD, n8n, Automation, Fullstack Developer, Laravel, PHP, Linux, Cloudflare, Self-Hosted, Infrastructure" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#09090b" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Generator -->
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Critical Pre-render Script: Prevent Theme & Language Flash -->
+    <script is:inline define:vars={{ translationsData: translations }}>
+      window.__TRANSLATIONS__ = translationsData;
+
+      // Theme initialization (Dark mode is default)
+      try {
+        const savedTheme = localStorage.getItem("portfolio_theme");
+        if (savedTheme === "light") {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.classList.add("light");
+        } else {
+          document.documentElement.classList.add("dark");
+          document.documentElement.classList.remove("light");
+        }
+      } catch (e) {
+        document.documentElement.classList.add("dark");
+      }
+
+      // Language initialization (English is default)
+      try {
+        const savedLang = localStorage.getItem("portfolio_lang");
+        if (savedLang === "id") {
+          document.documentElement.setAttribute("lang", "id");
+        } else {
+          document.documentElement.setAttribute("lang", "en");
+        }
+      } catch (e) {
+        document.documentElement.setAttribute("lang", "en");
+      }
+    </script>
+  </head>
+  <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 transition-colors duration-200">
+    <!-- Noise overlay -->
+    <div
+      class="fixed inset-0 pointer-events-none z-0 opacity-10 dark:opacity-25 transition-opacity duration-200"
+      style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/></filter><rect width=%22300%22 height=%22300%22 filter=%22url(%23n)%22 opacity=%220.06%22/></svg>');"
+    ></div>
+
+    <slot />
+
+    <!-- Global Client-Side Interaction Handlers -->
+    <script>
+      import type { Language } from "../i18n/translations";
+
+      const translations = (window as any).__TRANSLATIONS__;
+
+      // --- Theme Toggle Logic ---
+      function getCurrentTheme(): "dark" | "light" {
+        return document.documentElement.classList.contains("dark") ? "dark" : "light";
+      }
+
+      function updateThemeButtons(theme: "dark" | "light") {
+        document.querySelectorAll(".theme-toggle-btn").forEach((btn) => {
+          const sunIcon = btn.querySelector(".theme-icon-sun");
+          const moonIcon = btn.querySelector(".theme-icon-moon");
+          if (theme === "dark") {
+            sunIcon?.classList.remove("hidden");
+            moonIcon?.classList.add("hidden");
+            btn.setAttribute("title", "Switch to Light mode");
+            btn.setAttribute("aria-label", "Switch to Light mode");
+          } else {
+            sunIcon?.classList.add("hidden");
+            moonIcon?.classList.remove("hidden");
+            btn.setAttribute("title", "Switch to Dark mode");
+            btn.setAttribute("aria-label", "Switch to Dark mode");
+          }
+        });
+      }
+
+      function setTheme(newTheme: "dark" | "light") {
+        if (newTheme === "light") {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.classList.add("light");
+        } else {
+          document.documentElement.classList.add("dark");
+          document.documentElement.classList.remove("light");
+        }
+        localStorage.setItem("portfolio_theme", newTheme);
+        updateThemeButtons(newTheme);
+      }
+
+      // Initialize theme UI
+      updateThemeButtons(getCurrentTheme());
+
+      document.querySelectorAll(".theme-toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const next = getCurrentTheme() === "dark" ? "light" : "dark";
+          setTheme(next);
+        });
+      });
+
+      // --- Language Toggle Logic ---
+      function getCurrentLang(): Language {
+        return (document.documentElement.getAttribute("lang") as Language) || "en";
+      }
+
+      function updateLanguageUI(lang: Language) {
+        // Update all data-i18n text nodes
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (key && translations?.[lang]?.[key]) {
+            el.textContent = translations[lang][key];
+          }
+        });
+
+        // Update all data-i18n-placeholder attributes
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-placeholder");
+          if (key && translations?.[lang]?.[key]) {
+            (el as HTMLInputElement | HTMLTextAreaElement).placeholder = translations[lang][key];
+          }
+        });
+
+        // Update all data-i18n-title attributes
+        document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-title");
+          if (key && translations?.[lang]?.[key]) {
+            el.setAttribute("title", translations[lang][key]);
+          }
+        });
+
+        // Update Language Switcher buttons UI
+        document.querySelectorAll(".lang-indicator-en").forEach((el) => {
+          if (lang === "en") {
+            el.classList.add("text-zinc-900", "dark:text-zinc-100", "font-semibold");
+            el.classList.remove("text-zinc-400", "dark:text-zinc-500", "font-normal");
+          } else {
+            el.classList.remove("text-zinc-900", "dark:text-zinc-100", "font-semibold");
+            el.classList.add("text-zinc-400", "dark:text-zinc-500", "font-normal");
+          }
+        });
+
+        document.querySelectorAll(".lang-indicator-id").forEach((el) => {
+          if (lang === "id") {
+            el.classList.add("text-zinc-900", "dark:text-zinc-100", "font-semibold");
+            el.classList.remove("text-zinc-400", "dark:text-zinc-500", "font-normal");
+          } else {
+            el.classList.remove("text-zinc-900", "dark:text-zinc-100", "font-semibold");
+            el.classList.add("text-zinc-400", "dark:text-zinc-500", "font-normal");
+          }
+        });
+
+        // Dispatch custom event for dynamic components (like StatusWidget timestamp)
+        window.dispatchEvent(new CustomEvent("portfolio-lang-change", { detail: { lang } }));
+      }
+
+      function setLanguage(newLang: Language) {
+        document.documentElement.setAttribute("lang", newLang);
+        localStorage.setItem("portfolio_lang", newLang);
+        updateLanguageUI(newLang);
+      }
+
+      // Initial translation run if Indonesian is stored
+      const initialLang = getCurrentLang();
+      updateLanguageUI(initialLang);
+
+      document.querySelectorAll(".lang-toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const current = getCurrentLang();
+          const next = current === "en" ? "id" : "en";
+          setLanguage(next);
+        });
+      });
+
+      // --- Scroll Reveal Animation ---
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "0px 0px -50px 0px",
+        }
+      );
+
+      document.querySelectorAll(".section-fade").forEach((el) => {
+        observer.observe(el);
+      });
+    </script>
+  </body>
+</html>
