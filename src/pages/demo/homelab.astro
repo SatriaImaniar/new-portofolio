@@ -1,0 +1,16 @@
+---
+// src/pages/demo/homelab.astro
+// Route page for the Self-Hosted Home Server & Cloud Infrastructure Demo
+// Integrates with Layout.astro and renders the interactive HomelabDemo component.
+
+import Layout from "../../layouts/Layout.astro";
+import HomelabDemo from "../../components/HomelabDemo.astro";
+---
+
+<Layout
+  title="HomeLab Ops — Self-Hosted Cloud Infrastructure & CGNAT Bypass Demo | Satria Imaniar"
+  description="Live production-grade Home Lab & Cloud Infrastructure Dashboard simulation featuring CGNAT bypass via Cloudflare Zero-Trust Tunnels, Nginx Proxy Manager, Docker health grid, real-time telemetry, and interactive terminal."
+>
+  <HomelabDemo />
+</Layout>
+

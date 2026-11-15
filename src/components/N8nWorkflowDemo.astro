@@ -1,0 +1,1981 @@
+---
+// N8nWorkflowDemo.astro
+// Interactive Production Demo for "AI-Powered Workflow Automation with n8n"
+// Aesthetics inspired by n8n, Node-RED, and Vercel dark mode.
+// Features: Interactive Flowchart Node Canvas, Live Metrics & Telemetry,
+// Interactive Trigger Simulator with live progress stepper, JSON payload viewer,
+// Dispatched Notification preview, and Recent Execution Logs Table.
+
+const defaultOutputJson = JSON.stringify(
+  {
+    status: "SUCCESS",
+    workflowId: "WF-8092",
+    executionTimeMs: 304,
+    nodesExecuted: 5,
+    geminiInference: {
+      model: "gemini-1.5-pro-latest",
+      promptTokens: 142,
+      completionTokens: 50,
+      totalTokens: 192,
+      category: "CRITICAL_INCIDENT",
+      summary: "Master database connection pool exhausted with critical latency spike of 4.8s. 42 queries blocked."
+    },
+    routerDecision: {
+      matchedRule: "severity == 'CRITICAL'",
+      targetBranch: "Branch A (Emergency Ops)"
+    },
+    dispatcher: {
+      channel: "Telegram Bot (@OpsTriageBot)",
+      messageId: 92841,
+      deliveredAt: "2026-11-06T23:38:12Z"
+    }
+  },
+  null,
+  2
+);
+---
+
+<div class="n8n-demo min-h-screen bg-zinc-950 text-zinc-300 font-sans antialiased selection:bg-orange-500/20 selection:text-orange-200">
+
+  <!-- ═══════════════ TOP HEADER & WORKER STATUS ═══════════════ -->
+  <header class="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+      
+      <!-- Brand & Worker Identifier -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 shadow-sm shadow-orange-500/10 group cursor-pointer" id="header-brand-icon" title="n8n Production Worker Engine">
+          <svg class="w-5 h-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-white font-semibold text-sm sm:text-base tracking-tight" data-i18n="demo.n8n.title">
+              n8n Automation Engine v1.8 (Production Worker)
+            </span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+              CLUSTER #1
+            </span>
+          </div>
+          <p class="text-[11px] text-zinc-400 hidden sm:block" data-i18n="demo.n8n.subtitle">
+            Autonomous Event-Driven AI Pipeline & Multi-Channel Alert Router
+          </p>
+        </div>
+
+        <!-- Global Worker Status Badge -->
+        <div class="hidden xl:flex items-center gap-2 ml-4 pl-4 border-l border-zinc-800/80">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-mono text-emerald-400" data-i18n="demo.n8n.badge">
+            🟢 Active Workflows: 6 Running • 0 Failed
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Trigger Manual Execution Button -->
+        <button
+          type="button"
+          id="btn-header-trigger"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-orange-600 hover:bg-orange-500 border border-orange-500/50 rounded-lg transition-all duration-150 shadow-sm shadow-orange-600/20 active:scale-95"
+          title="Scroll to Trigger Simulator & launch workflow"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="demo.n8n.triggerManual">Trigger Manual Execution</span>
+          <span class="sm:hidden">Trigger</span>
+        </button>
+
+        <!-- View Execution Logs Button -->
+        <button
+          type="button"
+          id="btn-header-logs"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors duration-150 shadow-sm"
+          title="View recent execution log audit table"
+        >
+          <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+          </svg>
+          <span class="hidden md:inline" data-i18n="demo.n8n.viewLogs">View Execution Logs</span>
+          <span class="md:hidden">Logs</span>
+        </button>
+
+        <!-- Language Switcher (Native Portfolio Integration) -->
+        <button
+          type="button"
+          class="lang-toggle-btn inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-mono rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
+          aria-label="Switch language (EN/ID)"
+          title="Switch language"
+        >
+          <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+          </svg>
+          <span class="lang-indicator-en font-semibold text-white">EN</span>
+          <span class="text-zinc-600">/</span>
+          <span class="lang-indicator-id text-zinc-500 font-normal">ID</span>
+        </button>
+
+        <!-- Back to Portfolio Link -->
+        <a
+          href="/#projects"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900/70 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+          title="Return to Portfolio Featured Projects"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="demo.n8n.back">Back to Portfolio</span>
+          <span class="sm:hidden">Back</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT CONTAINER ═══════════════ -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- ── SECTION 1: LIVE EXECUTION METRICS & STATS GRID ── -->
+    <section aria-labelledby="metrics-heading">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 id="metrics-heading" class="text-sm font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2" data-i18n="demo.n8n.metricsTitle">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            Live Execution Metrics & Telemetry
+          </h2>
+          <p class="text-xs text-zinc-500" data-i18n="demo.n8n.metricsSubtitle">
+            Continuous performance stats across active production workers
+          </p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono text-zinc-500">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Worker: node-01.ord (Healthy)</span>
+        </div>
+      </div>
+
+      <!-- 4 High-Impact Telemetry Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Metric 1: Total Executions -->
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-zinc-700 transition-all duration-200 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-colors"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-zinc-400" data-i18n="demo.n8n.metricExecutions">Total Executions Today</span>
+            <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="metric-total-runs" class="text-2xl sm:text-3xl font-mono font-bold text-white tracking-tight">1,428</span>
+            <span class="text-xs font-mono text-zinc-500">runs</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="inline-flex items-center gap-1 font-mono text-emerald-400">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+              </svg>
+              +14.2% vs yesterday
+            </span>
+            <span class="text-zinc-500 font-mono">1,425 ok • 3 retried</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Average Speed -->
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-zinc-700 transition-all duration-200 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-zinc-400" data-i18n="demo.n8n.metricSpeed">Average Execution Speed</span>
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="metric-avg-speed" class="text-2xl sm:text-3xl font-mono font-bold text-white tracking-tight">320ms</span>
+            <span class="text-xs font-mono text-zinc-500">per workflow</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              p95: 410ms
+            </span>
+            <span class="text-zinc-500 font-mono">Network 35ms • LLM 210ms</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: AI Token Consumption -->
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-zinc-700 transition-all duration-200 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/10 transition-colors"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-zinc-400" data-i18n="demo.n8n.metricTokens">AI Token Consumption</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="metric-tokens" class="text-2xl sm:text-3xl font-mono font-bold text-white tracking-tight">~45.2k</span>
+            <span class="text-xs font-mono text-zinc-500">tokens (Optimized)</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              88.4% Cache Hit
+            </span>
+            <span class="text-zinc-500 font-mono">Gemini 1.5 Pro</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Success Rate -->
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 hover:border-zinc-700 transition-all duration-200 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-zinc-400" data-i18n="demo.n8n.metricSuccess">Success Rate</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-mono font-bold text-emerald-400 tracking-tight">99.8%</span>
+            <span class="text-xs font-mono text-zinc-500">uptime</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="text-zinc-400 font-mono">0 dropped events</span>
+            <span class="text-emerald-400 font-mono">Self-healing retry</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 2: INTERACTIVE WORKFLOW VISUALIZER (CANVAS NODES PREVIEW) ── -->
+    <section class="rounded-2xl bg-zinc-900/40 border border-zinc-800/80 overflow-hidden shadow-xl" aria-labelledby="canvas-heading">
+      
+      <!-- Canvas Top Toolbar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <h3 id="canvas-heading" class="text-xs sm:text-sm font-semibold text-white tracking-tight" data-i18n="demo.n8n.canvasTitle">
+              AI Pipeline Visualizer & Node Graph
+            </h3>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+            Active DAG: #WF-8092
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <span class="hidden md:inline-flex items-center gap-1.5 text-[11px] text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800" data-i18n="demo.n8n.canvasHint">
+            <svg class="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Click any node to inspect configuration, input JSON payload, and output tokens
+          </span>
+          <button
+            type="button"
+            id="btn-canvas-reset"
+            class="px-2 py-1 text-[11px] font-mono rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+            title="Reset Canvas View"
+          >
+            Reset View
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas Visual Board -->
+      <div class="relative p-6 sm:p-8 overflow-x-auto select-none" style="background-image: radial-gradient(circle, #27272a 1px, transparent 1px); background-size: 20px 20px; background-color: #09090b;">
+        
+        <!-- Live execution overlay line indicator -->
+        <div id="canvas-status-banner" class="mb-6 flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-sm">
+          <div class="flex items-center gap-2.5">
+            <span id="canvas-pulse-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="canvas-status-text" class="text-xs font-mono text-zinc-300">
+              Worker Status: Standing by for webhook triggers (HTTP POST /webhook/v1/user-feedback)
+            </span>
+          </div>
+          <span id="canvas-time-text" class="text-[11px] font-mono text-zinc-400">
+            Last executed: 2m ago (312ms)
+          </span>
+        </div>
+
+        <!-- Flowchart Nodes Chain (Horizontal on desktop, flex-wrap on smaller screens) -->
+        <div class="min-w-[880px] flex items-center justify-between gap-4 py-4 relative">
+          
+          <!-- NODE 1: Webhook Trigger (HTTP POST) -->
+          <div
+            class="workflow-node group relative w-56 rounded-xl bg-zinc-900/90 border-2 border-orange-500/40 hover:border-orange-500 p-3.5 shadow-lg shadow-black/40 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-orange-500/10 active:scale-98"
+            data-node-id="node-webhook"
+            title="Click to inspect Webhook Trigger Configuration & Raw Payload"
+          >
+            <!-- Node Header -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                TRIGGER • POST
+              </span>
+              <span class="node-status-dot w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            </div>
+            <!-- Node Body -->
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-semibold text-white truncate group-hover:text-orange-300 transition-colors">
+                  Webhook Trigger
+                </h4>
+                <p class="text-[10px] text-zinc-400 font-mono truncate">
+                  /webhook/v1/feedback
+                </p>
+              </div>
+            </div>
+            <!-- Node Footnote -->
+            <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span class="truncate">Rate: 60/min</span>
+              <span class="text-orange-400 group-hover:underline">Inspect ➔</span>
+            </div>
+            <!-- Right Output Port Dot -->
+            <span class="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-orange-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+            </span>
+          </div>
+
+          <!-- CONNECTOR 1 -> 2 -->
+          <div class="node-connector flex-1 flex items-center justify-center relative min-w-[36px]" id="connector-1">
+            <div class="w-full h-0.5 bg-zinc-800 relative overflow-hidden rounded">
+              <div class="connector-glow absolute inset-0 bg-gradient-to-r from-orange-500 to-cyan-500 opacity-0 transition-opacity duration-300"></div>
+            </div>
+            <svg class="w-3.5 h-3.5 text-zinc-600 absolute right-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+
+          <!-- NODE 2: Data Sanitizer & Filter -->
+          <div
+            class="workflow-node group relative w-56 rounded-xl bg-zinc-900/90 border-2 border-cyan-500/40 hover:border-cyan-500 p-3.5 shadow-lg shadow-black/40 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-cyan-500/10 active:scale-98"
+            data-node-id="node-sanitizer"
+            title="Click to inspect Data Sanitizer & Zod Validation Code"
+          >
+            <!-- Left Input Port Dot -->
+            <span class="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-cyan-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            </span>
+            <!-- Node Header -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                CODE • TRANSFORM
+              </span>
+              <span class="node-status-dot w-2 h-2 rounded-full bg-emerald-400"></span>
+            </div>
+            <!-- Node Body -->
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
+                  Data Sanitizer & Filter
+                </h4>
+                <p class="text-[10px] text-zinc-400 font-mono truncate">
+                  XSS Strip • Zod Schema
+                </p>
+              </div>
+            </div>
+            <!-- Node Footnote -->
+            <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span class="truncate">Validation: Strict</span>
+              <span class="text-cyan-400 group-hover:underline">Inspect ➔</span>
+            </div>
+            <!-- Right Output Port Dot -->
+            <span class="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-cyan-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            </span>
+          </div>
+
+          <!-- CONNECTOR 2 -> 3 -->
+          <div class="node-connector flex-1 flex items-center justify-center relative min-w-[36px]" id="connector-2">
+            <div class="w-full h-0.5 bg-zinc-800 relative overflow-hidden rounded">
+              <div class="connector-glow absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 opacity-0 transition-opacity duration-300"></div>
+            </div>
+            <svg class="w-3.5 h-3.5 text-zinc-600 absolute right-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+
+          <!-- NODE 3: Gemini AI LLM Node -->
+          <div
+            class="workflow-node group relative w-60 rounded-xl bg-zinc-900/90 border-2 border-purple-500/40 hover:border-purple-500 p-3.5 shadow-lg shadow-black/40 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-purple-500/10 active:scale-98"
+            data-node-id="node-gemini"
+            title="Click to inspect Gemini 1.5 Pro Prompt, Output Tokens & Settings"
+          >
+            <!-- Left Input Port Dot -->
+            <span class="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-purple-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+            </span>
+            <!-- Node Header -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                AI INFERENCE • LLM
+              </span>
+              <span class="node-status-dot w-2 h-2 rounded-full bg-emerald-400"></span>
+            </div>
+            <!-- Node Body -->
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
+                  Gemini AI LLM Node
+                </h4>
+                <p class="text-[10px] text-zinc-400 font-mono truncate">
+                  gemini-1.5-pro • Summarize
+                </p>
+              </div>
+            </div>
+            <!-- Node Footnote -->
+            <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span class="truncate">Temp: 0.2 • ~190 tok</span>
+              <span class="text-purple-400 group-hover:underline">Inspect ➔</span>
+            </div>
+            <!-- Right Output Port Dot -->
+            <span class="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-purple-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+            </span>
+          </div>
+
+          <!-- CONNECTOR 3 -> 4 -->
+          <div class="node-connector flex-1 flex items-center justify-center relative min-w-[36px]" id="connector-3">
+            <div class="w-full h-0.5 bg-zinc-800 relative overflow-hidden rounded">
+              <div class="connector-glow absolute inset-0 bg-gradient-to-r from-purple-500 to-amber-500 opacity-0 transition-opacity duration-300"></div>
+            </div>
+            <svg class="w-3.5 h-3.5 text-zinc-600 absolute right-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+
+          <!-- NODE 4: Conditional Router -->
+          <div
+            class="workflow-node group relative w-56 rounded-xl bg-zinc-900/90 border-2 border-amber-500/40 hover:border-amber-500 p-3.5 shadow-lg shadow-black/40 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-amber-500/10 active:scale-98"
+            data-node-id="node-router"
+            title="Click to inspect Branch Logic & Rule Conditions"
+          >
+            <!-- Left Input Port Dot -->
+            <span class="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-amber-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            </span>
+            <!-- Node Header -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                LOGIC • SWITCH
+              </span>
+              <span class="node-status-dot w-2 h-2 rounded-full bg-emerald-400"></span>
+            </div>
+            <!-- Node Body -->
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-semibold text-white truncate group-hover:text-amber-300 transition-colors">
+                  Conditional Router
+                </h4>
+                <p class="text-[10px] text-zinc-400 font-mono truncate">
+                  If: Severity == High
+                </p>
+              </div>
+            </div>
+            <!-- Node Footnote -->
+            <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span class="truncate">2 Target Branches</span>
+              <span class="text-amber-400 group-hover:underline">Inspect ➔</span>
+            </div>
+            <!-- Right Output Port Dot -->
+            <span class="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-amber-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            </span>
+          </div>
+
+          <!-- CONNECTOR 4 -> 5 -->
+          <div class="node-connector flex-1 flex items-center justify-center relative min-w-[36px]" id="connector-4">
+            <div class="w-full h-0.5 bg-zinc-800 relative overflow-hidden rounded">
+              <div class="connector-glow absolute inset-0 bg-gradient-to-r from-amber-500 to-emerald-500 opacity-0 transition-opacity duration-300"></div>
+            </div>
+            <svg class="w-3.5 h-3.5 text-zinc-600 absolute right-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+
+          <!-- NODE 5: Action / Notification -->
+          <div
+            class="workflow-node group relative w-60 rounded-xl bg-zinc-900/90 border-2 border-emerald-500/40 hover:border-emerald-500 p-3.5 shadow-lg shadow-black/40 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-emerald-500/10 active:scale-98"
+            data-node-id="node-action"
+            title="Click to inspect Telegram & Discord Dispatch Config"
+          >
+            <!-- Left Input Port Dot -->
+            <span class="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-emerald-400 flex items-center justify-center shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            </span>
+            <!-- Node Header -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                ACTION • DISPATCH
+              </span>
+              <span class="node-status-dot w-2 h-2 rounded-full bg-emerald-400"></span>
+            </div>
+            <!-- Node Body -->
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-semibold text-white truncate group-hover:text-emerald-300 transition-colors">
+                  Action / Notification
+                </h4>
+                <p class="text-[10px] text-zinc-400 font-mono truncate">
+                  Telegram & Discord Webhooks
+                </p>
+              </div>
+            </div>
+            <!-- Node Footnote -->
+            <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span class="truncate">Channels: #ops-triage</span>
+              <span class="text-emerald-400 group-hover:underline">Inspect ➔</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: INTERACTIVE WORKFLOW TEST CONSOLE / TRIGGER SIMULATOR ── -->
+    <section id="simulator-section" class="grid grid-cols-1 lg:grid-cols-12 gap-6" aria-labelledby="simulator-heading">
+      
+      <!-- LEFT WORKBENCH: Trigger Form & Stepper (7 Cols) -->
+      <div class="lg:col-span-7 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 p-5 sm:p-6 backdrop-blur-sm space-y-5">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-800/80">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+              <h3 id="simulator-heading" class="text-sm sm:text-base font-semibold text-white tracking-tight" data-i18n="demo.n8n.simulatorTitle">
+                Interactive Workflow Test Console & Trigger Simulator
+              </h3>
+            </div>
+            <p class="text-xs text-zinc-400 mt-0.5" data-i18n="demo.n8n.simulatorSubtitle">
+              Send test messages or synthetic webhook events to trigger live multi-step node execution.
+            </p>
+          </div>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700/60 self-start sm:self-auto">
+            POST /api/v1/user-feedback
+          </span>
+        </div>
+
+        <!-- Preset Selection Pills -->
+        <div>
+          <label class="block text-xs font-mono text-zinc-400 mb-2">
+            Load Quick Preset Payloads:
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              type="button"
+              class="btn-preset active px-2.5 py-1.5 text-xs font-mono rounded-lg border text-left transition-all bg-orange-500/10 border-orange-500/40 text-orange-300"
+              data-preset="db-latency"
+            >
+              🚨 DB Spike (Crit)
+            </button>
+            <button
+              type="button"
+              class="btn-preset px-2.5 py-1.5 text-xs font-mono rounded-lg border text-left transition-all bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+              data-preset="customer-review"
+            >
+              😡 Angry Review
+            </button>
+            <button
+              type="button"
+              class="btn-preset px-2.5 py-1.5 text-xs font-mono rounded-lg border text-left transition-all bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+              data-preset="feature-req"
+            >
+              💡 Feature Req
+            </button>
+            <button
+              type="button"
+              class="btn-preset px-2.5 py-1.5 text-xs font-mono rounded-lg border text-left transition-all bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+              data-preset="api-throttling"
+            >
+              ⚠️ Rate Limit
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Input Form -->
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="input-source" class="block text-xs font-mono text-zinc-400 mb-1">
+                Source Identifier
+              </label>
+              <input
+                type="text"
+                id="input-source"
+                value="monitoring.datadog"
+                class="w-full px-3 py-1.5 text-xs font-mono rounded-lg bg-zinc-900/90 border border-zinc-800 text-white focus:outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label for="input-severity" class="block text-xs font-mono text-zinc-400 mb-1">
+                Severity Level
+              </label>
+              <select
+                id="input-severity"
+                class="w-full px-3 py-1.5 text-xs font-mono rounded-lg bg-zinc-900/90 border border-zinc-800 text-white focus:outline-none focus:border-orange-500"
+              >
+                <option value="CRITICAL" selected>CRITICAL (Telegram Urgent)</option>
+                <option value="HIGH">HIGH (Telegram Alert)</option>
+                <option value="MEDIUM">MEDIUM (Discord Channel)</option>
+                <option value="LOW">LOW (Discord Daily Log)</option>
+              </select>
+            </div>
+            <div>
+              <label for="input-cluster" class="block text-xs font-mono text-zinc-400 mb-1">
+                Origin Region
+              </label>
+              <input
+                type="text"
+                id="input-cluster"
+                value="ap-southeast-3 (Jakarta)"
+                class="w-full px-3 py-1.5 text-xs font-mono rounded-lg bg-zinc-900/90 border border-zinc-800 text-white focus:outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="input-payload" class="text-xs font-mono text-zinc-400">
+                Inbound Message / Webhook Raw JSON Payload:
+              </label>
+              <button
+                type="button"
+                id="btn-format-json"
+                class="text-[11px] font-mono text-orange-400 hover:text-orange-300"
+              >
+                Format / Reset
+              </button>
+            </div>
+            <textarea
+              id="input-payload"
+              rows="4"
+              class="w-full px-3 py-2 text-xs font-mono rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 focus:outline-none focus:border-orange-500 leading-relaxed resize-none"
+            >Postgres connection pool exhausted on master-db-01. Latency spike: 4,820ms (&gt;500ms threshold). 42 queries blocked in queue. Immediate failover required.</textarea>
+          </div>
+        </div>
+
+        <!-- Action Execution Button -->
+        <div class="pt-2">
+          <button
+            type="button"
+            id="btn-run-workflow"
+            class="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold text-xs sm:text-sm tracking-tight flex items-center justify-center gap-2 transition-all duration-150 shadow-md shadow-orange-600/30 active:scale-99 cursor-pointer"
+          >
+            <svg id="run-spinner" class="w-4 h-4 hidden animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <svg id="run-play-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            </svg>
+            <span id="run-btn-label" data-i18n="demo.n8n.simulatorRunBtn">Run Workflow Now</span>
+          </button>
+        </div>
+
+        <!-- Live Step-by-Step Execution Progress Bar -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span id="execution-stage-label" class="text-zinc-400">Execution Status: Idle (Ready)</span>
+            <span id="execution-progress-pct" class="text-orange-400 font-bold">0%</span>
+          </div>
+
+          <!-- Progress Bar Track -->
+          <div class="w-full h-2 rounded-full bg-zinc-950 border border-zinc-800 overflow-hidden">
+            <div id="execution-progress-bar" class="h-full bg-gradient-to-r from-orange-500 via-purple-500 to-emerald-500 w-0 transition-all duration-300 ease-out"></div>
+          </div>
+
+          <!-- Step Indicators Checklist -->
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 text-[11px] font-mono">
+            <div class="step-badge flex items-center gap-1.5 text-zinc-500" id="step-1">
+              <span class="step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]">1</span>
+              <span class="truncate">Webhook</span>
+            </div>
+            <div class="step-badge flex items-center gap-1.5 text-zinc-500" id="step-2">
+              <span class="step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]">2</span>
+              <span class="truncate">Sanitize</span>
+            </div>
+            <div class="step-badge flex items-center gap-1.5 text-zinc-500" id="step-3">
+              <span class="step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]">3</span>
+              <span class="truncate">Gemini AI</span>
+            </div>
+            <div class="step-badge flex items-center gap-1.5 text-zinc-500" id="step-4">
+              <span class="step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]">4</span>
+              <span class="truncate">Router</span>
+            </div>
+            <div class="step-badge flex items-center gap-1.5 text-zinc-500" id="step-5">
+              <span class="step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]">5</span>
+              <span class="truncate">Dispatch</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT WORKBENCH: Live Output & Dispatched Alert Preview (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <!-- Live JSON Output Viewer -->
+        <div class="rounded-2xl bg-zinc-900/40 border border-zinc-800/80 p-4 sm:p-5 backdrop-blur-sm flex-1 flex flex-col">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-800/80">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span class="text-xs font-mono font-medium text-white">Live Execution Output (JSON)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="output-duration-tag" class="text-[10px] font-mono text-zinc-500">Duration: 304ms</span>
+              <button
+                type="button"
+                id="btn-copy-json"
+                class="px-2 py-0.5 text-[10px] font-mono rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors flex items-center gap-1"
+                title="Copy Output JSON"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="relative flex-1 bg-zinc-950 rounded-xl p-3 border border-zinc-800/90 font-mono text-[11px] text-zinc-300 overflow-y-auto max-h-[220px]">
+            <pre id="output-json-code" class="text-emerald-400 leading-relaxed whitespace-pre">{defaultOutputJson}</pre>
+          </div>
+        </div>
+
+        <!-- Live Dispatched Notification Card Preview -->
+        <div class="rounded-2xl bg-zinc-900/40 border border-zinc-800/80 p-4 sm:p-5 backdrop-blur-sm">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800/80">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-mono font-medium text-white">Dispatched Multi-Channel Alert</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              SENT • HTTP 200
+            </span>
+          </div>
+
+          <!-- Telegram Bubble Simulation -->
+          <div class="p-3 rounded-xl bg-zinc-950/90 border border-zinc-800 text-xs font-sans space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .39z"/>
+                </svg>
+                Ops Triage Bot [Auto-Escalation]
+              </span>
+              <span id="alert-time" class="text-[10px] font-mono text-zinc-500">23:38:12</span>
+            </div>
+            <p id="alert-headline" class="text-white font-medium">
+              🚨 <strong class="text-red-400">CRITICAL_INCIDENT:</strong> Postgres Latency Spike (4.8s)
+            </p>
+            <p id="alert-summary" class="text-zinc-300 text-[11px] leading-relaxed">
+              Gemini AI Summary: Master database connection pool exhausted on master-db-01. 42 queries blocked in queue. Immediate failover required.
+            </p>
+            <div class="pt-1 flex items-center justify-between text-[10px] font-mono text-zinc-500 border-t border-zinc-800/60">
+              <span>Channel: #incident-triage</span>
+              <span class="text-orange-400">Tokens: 192 • Cost: $0.00004</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── SECTION 4: RECENT EXECUTION LOGS TABLE ── -->
+    <section id="logs-section" class="rounded-2xl bg-zinc-900/40 border border-zinc-800/80 p-5 sm:p-6 backdrop-blur-sm space-y-4" aria-labelledby="logs-heading">
+      
+      <!-- Table Header & Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <h3 id="logs-heading" class="text-sm sm:text-base font-semibold text-white tracking-tight" data-i18n="demo.n8n.logsTitle">
+              Recent Execution Logs
+            </h3>
+          </div>
+          <p class="text-xs text-zinc-400 mt-0.5" data-i18n="demo.n8n.logsSubtitle">
+            Live trace of incoming webhooks, duration, and worker exit statuses.
+          </p>
+        </div>
+
+        <!-- Filter Pills & Search Input -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Status Filters -->
+          <div class="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-zinc-800 text-xs font-mono">
+            <button type="button" class="log-filter-btn active px-2.5 py-1 rounded bg-zinc-800 text-white" data-status="all" data-i18n="demo.n8n.filterAll">All</button>
+            <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-white" data-status="success" data-i18n="demo.n8n.filterSuccess">Success</button>
+            <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-white" data-status="running" data-i18n="demo.n8n.filterRunning">Running</button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative">
+            <input
+              type="text"
+              id="log-search-input"
+              placeholder="Search execution logs..."
+              data-i18n-placeholder="demo.n8n.searchPlaceholder"
+              class="w-48 sm:w-60 px-3 py-1.5 text-xs font-mono rounded-lg bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Table -->
+      <div class="overflow-x-auto rounded-xl border border-zinc-800/80">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-zinc-950/80 text-zinc-400 border-b border-zinc-800 uppercase text-[10px] tracking-wider">
+            <tr>
+              <th scope="col" class="py-3 px-4 font-semibold" data-i18n="demo.n8n.colWorkflow">Workflow Name</th>
+              <th scope="col" class="py-3 px-4 font-semibold" data-i18n="demo.n8n.colTrigger">Trigger Source</th>
+              <th scope="col" class="py-3 px-4 font-semibold" data-i18n="demo.n8n.colStatus">Status</th>
+              <th scope="col" class="py-3 px-4 font-semibold" data-i18n="demo.n8n.colDuration">Duration</th>
+              <th scope="col" class="py-3 px-4 font-semibold" data-i18n="demo.n8n.colTimestamp">Timestamp</th>
+              <th scope="col" class="py-3 px-4 font-semibold text-right" data-i18n="demo.n8n.colAction">Action</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table-body" class="divide-y divide-zinc-800/60 bg-zinc-900/30">
+            <!-- Row 1 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="success">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Customer Review AI Triage</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8092</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">HTTP Webhook (Shopify)</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Success
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">294ms</td>
+              <td class="py-3 px-4 text-zinc-400">2 mins ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8092">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="success">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Postgres Connection Pool Alert</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8091</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">Datadog Webhook</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Success
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">340ms</td>
+              <td class="py-3 px-4 text-zinc-400">7 mins ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8091">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="running">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                </span>
+                <span>Daily Telemetry Sync & Summarize</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8090</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">Cron Trigger (Every 15m)</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  Running
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">180ms...</td>
+              <td class="py-3 px-4 text-zinc-400">12 mins ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8090">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="success">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>GitHub PR Security Audit Hook</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8089</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">GitHub Webhook (PR #142)</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Success
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">285ms</td>
+              <td class="py-3 px-4 text-zinc-400">24 mins ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8089">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="success">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Stripe Disputed Charge Auto-Alert</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8088</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">Stripe Webhook</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Success
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">365ms</td>
+              <td class="py-3 px-4 text-zinc-400">41 mins ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8088">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr class="hover:bg-zinc-800/40 transition-colors" data-status="success">
+              <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Cloudflare Zero-Trust Audit Stream</span>
+                <span class="text-[10px] text-zinc-500 font-normal">#WF-8087</span>
+              </td>
+              <td class="py-3 px-4 text-zinc-400">HTTP POST /tunnels/log</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Success
+                </span>
+              </td>
+              <td class="py-3 px-4 text-zinc-300">310ms</td>
+              <td class="py-3 px-4 text-zinc-400">1 hour ago</td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="WF-8087">
+                  Inspect Run
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ═══════════════ MODAL / SIDE DRAWER 1: NODE INSPECTOR ═══════════════ -->
+  <div id="modal-node-inspector" class="fixed inset-0 z-50 hidden" aria-labelledby="node-inspector-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" id="node-inspector-backdrop"></div>
+
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div class="w-screen max-w-xl bg-zinc-950 border-l border-zinc-800 text-zinc-300 shadow-2xl flex flex-col">
+        
+        <!-- Drawer Header -->
+        <div class="p-5 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-900/60">
+          <div class="flex items-center gap-3">
+            <div id="drawer-node-icon" class="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 id="drawer-node-title" class="text-sm font-semibold text-white tracking-tight">
+                  Webhook Trigger (HTTP POST)
+                </h3>
+                <span id="drawer-node-badge" class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  TRIGGER
+                </span>
+              </div>
+              <p id="drawer-node-subtitle" class="text-[11px] text-zinc-400 font-mono">
+                /webhook/v1/user-feedback • Rate Limit 60 req/min
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="btn-close-node-inspector"
+            class="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors"
+            title="Close Drawer (ESC)"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Drawer Content Tabs -->
+        <div class="flex border-b border-zinc-800 text-xs font-mono bg-zinc-900/30">
+          <button type="button" class="drawer-tab active px-4 py-2.5 font-medium border-b-2 border-orange-500 text-orange-400" data-tab="config">Configuration</button>
+          <button type="button" class="drawer-tab px-4 py-2.5 font-medium text-zinc-400 hover:text-white" data-tab="input">Input JSON</button>
+          <button type="button" class="drawer-tab px-4 py-2.5 font-medium text-zinc-400 hover:text-white" data-tab="output">Output Data & Tokens</button>
+        </div>
+
+        <!-- Drawer Body Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-4">
+          
+          <!-- TAB 1: Config View -->
+          <div id="tab-content-config" class="space-y-4">
+            <div>
+              <h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-2 font-mono">Node Parameters</h4>
+              <div id="drawer-config-params" class="space-y-2 text-xs font-mono">
+                <!-- Dynamically populated parameters -->
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-2 font-mono">Execution Behaviour</h4>
+              <div class="p-3 rounded-lg bg-zinc-900/80 border border-zinc-800 text-xs text-zinc-300 leading-relaxed" id="drawer-config-desc">
+                Listens for inbound HTTP POST requests. Validates Bearer Authorization headers and acknowledges immediate HTTP 200 to prevent client timeouts before asynchronously handing off to worker pipelines.
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: Input JSON View -->
+          <div id="tab-content-input" class="hidden space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono text-zinc-400">Incoming Payload Received by Node:</span>
+              <button type="button" class="btn-copy-drawer-json px-2 py-0.5 text-[10px] font-mono rounded bg-zinc-800 text-zinc-300 hover:text-white">Copy JSON</button>
+            </div>
+            <pre id="drawer-input-json" class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-[11px] text-cyan-300 overflow-x-auto whitespace-pre leading-relaxed"></pre>
+          </div>
+
+          <!-- TAB 3: Output Data & Tokens View -->
+          <div id="tab-content-output" class="hidden space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono text-zinc-400">Data Transformed / Generated by Node:</span>
+              <button type="button" class="btn-copy-drawer-json px-2 py-0.5 text-[10px] font-mono rounded bg-zinc-800 text-zinc-300 hover:text-white">Copy JSON</button>
+            </div>
+            <pre id="drawer-output-json" class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-[11px] text-emerald-400 overflow-x-auto whitespace-pre leading-relaxed"></pre>
+          </div>
+
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="p-4 border-t border-zinc-800/80 bg-zinc-900/40 flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span id="drawer-footer-status">Node Status: Operational</span>
+          <span class="text-[11px]">Worker Engine v1.8</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MODAL 2: EXECUTION RUN INSPECTOR ═══════════════ -->
+  <div id="modal-run-inspector" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" aria-labelledby="run-inspector-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" id="run-inspector-backdrop"></div>
+
+    <div class="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-10">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <h3 id="run-inspector-title" class="text-sm font-semibold text-white tracking-tight">
+            Execution Run Audit Trace: <span id="modal-run-id-title" class="text-orange-400 font-mono">#WF-8092</span>
+          </h3>
+        </div>
+        <button
+          type="button"
+          id="btn-close-run-inspector"
+          class="p-1 rounded-lg text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <!-- Trace Metadata Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-xl bg-zinc-900/70 border border-zinc-800 text-xs font-mono">
+          <div>
+            <span class="text-zinc-500 block text-[10px]">EXECUTION TIME</span>
+            <span id="modal-run-time" class="text-white font-semibold">294 ms</span>
+          </div>
+          <div>
+            <span class="text-zinc-500 block text-[10px]">TOTAL TOKENS</span>
+            <span id="modal-run-tokens" class="text-purple-400 font-semibold">192 tokens</span>
+          </div>
+          <div>
+            <span class="text-zinc-500 block text-[10px]">STATUS</span>
+            <span class="text-emerald-400 font-semibold">SUCCESS (200)</span>
+          </div>
+          <div>
+            <span class="text-zinc-500 block text-[10px]">WORKER CLUSTER</span>
+            <span class="text-zinc-300">node-01.jkt</span>
+          </div>
+        </div>
+
+        <!-- Node Waterfall Timings -->
+        <div>
+          <h4 class="text-xs font-mono font-semibold text-zinc-300 mb-2">Step Execution Waterfall Timings:</h4>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="flex items-center justify-between p-2 rounded bg-zinc-900/40 border border-zinc-800/80">
+              <span class="text-orange-300">1. Webhook Ingestion & Auth</span>
+              <span class="text-zinc-400">12 ms</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded bg-zinc-900/40 border border-zinc-800/80">
+              <span class="text-cyan-300">2. Data Sanitizer & Zod Transform</span>
+              <span class="text-zinc-400">8 ms</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded bg-zinc-900/40 border border-zinc-800/80">
+              <span class="text-purple-300">3. Gemini 1.5 Pro LLM Inference</span>
+              <span class="text-zinc-400">218 ms</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded bg-zinc-900/40 border border-zinc-800/80">
+              <span class="text-amber-300">4. Conditional Logic Evaluation</span>
+              <span class="text-zinc-400">4 ms</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded bg-zinc-900/40 border border-zinc-800/80">
+              <span class="text-emerald-300">5. Multi-Dispatch (Telegram / Discord)</span>
+              <span class="text-zinc-400">52 ms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Payload Dump -->
+        <div>
+          <h4 class="text-xs font-mono font-semibold text-zinc-300 mb-2">Execution Snapshot JSON:</h4>
+          <pre id="modal-run-payload" class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-[11px] text-emerald-400 overflow-x-auto whitespace-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-zinc-800 bg-zinc-900/40 flex items-center justify-end">
+        <button
+          type="button"
+          id="btn-close-run-inspector-foot"
+          class="px-4 py-1.5 text-xs font-mono font-semibold text-white bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+        >
+          Close Inspector
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════ FLOATING TOAST NOTIFICATION ═══════════════ -->
+  <div
+    id="n8n-toast"
+    class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-900/95 border border-zinc-700 text-white text-xs font-mono shadow-2xl shadow-black/80 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none"
+  >
+    <span class="w-2 h-2 rounded-full bg-emerald-400" id="toast-dot"></span>
+    <span id="toast-message">Workflow execution completed successfully.</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════ CLIENT-SIDE INTERACTIVITY SCRIPT ═══════════════ -->
+<script is:inline>
+  (function () {
+    // Node configuration dataset for side drawer
+    const nodeData = {
+      "node-webhook": {
+        title: "Webhook Trigger (HTTP POST)",
+        badge: "TRIGGER • INBOUND",
+        badgeClass: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+        iconColor: "text-orange-400",
+        subtitle: "POST /webhook/v1/user-feedback • Rate Limit 60 req/min",
+        description: "Inbound HTTP POST receiver. Acts as the gateway entry point for client tickets, error logs, and synthetic events. Automatically verifies Bearer auth tokens and validates HTTP method before queueing to worker memory.",
+        params: [
+          { key: "Path", val: "/webhook/v1/user-feedback" },
+          { key: "HTTP Method", val: "POST" },
+          { key: "Authentication", val: "Bearer Token (Secret Key)" },
+          { key: "Rate Limiter", val: "60 requests / minute per IP" },
+          { key: "Response Mode", val: "On Received (HTTP 200 Acknowledged)" }
+        ],
+        input: {
+          "headers": {
+            "host": "api.production.internal",
+            "user-agent": "Datadog-Webhook-Agent/7.4",
+            "content-type": "application/json",
+            "authorization": "Bearer n8n_sec_89df201948ba"
+          },
+          "query": {},
+          "body": {
+            "source": "monitoring.datadog",
+            "severity": "CRITICAL",
+            "event": "Postgres connection pool exhausted on master-db-01. Latency spike: 4,820ms (>500ms threshold). 42 queries blocked.",
+            "timestamp": "2026-11-06T23:38:12.102Z"
+          }
+        },
+        output: {
+          "webhookAcknowledged": true,
+          "traceId": "trace_99182390a",
+          "rawBodyBytes": 284,
+          "ingestedAt": "2026-11-06T23:38:12.114Z",
+          "clientIp": "10.0.4.15"
+        }
+      },
+      "node-sanitizer": {
+        title: "Data Sanitizer & Filter",
+        badge: "CODE • TRANSFORM",
+        badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+        iconColor: "text-cyan-400",
+        subtitle: "XSS Strip • Zod Schema Validation • Whitespace Normalizer",
+        description: "Executes sandboxed Node.js data normalization. Strips potentially dangerous HTML/script tags from incoming user text, trims redundant whitespaces, and guarantees strict schema conformance via Zod before LLM token consumption.",
+        params: [
+          { key: "Transform Engine", val: "V8 Sandboxed Node.js Execution" },
+          { key: "XSS Cleansing", val: "DOMPurify & stripLow() enabled" },
+          { key: "Schema Validation", val: "Zod.object({ source: z.string(), severity: z.enum() })" },
+          { key: "Max Payload Size", val: "128 KB (Strict limit)" },
+          { key: "Execution Timeout", val: "50 ms" }
+        ],
+        input: {
+          "rawText": "Postgres connection pool exhausted on master-db-01... <script>alert(1)<\\/script>",
+          "severity": "CRITICAL",
+          "source": "monitoring.datadog"
+        },
+        output: {
+          "sanitizedText": "Postgres connection pool exhausted on master-db-01. Latency spike: 4,820ms (>500ms threshold). 42 queries blocked in queue.",
+          "priority": "CRITICAL",
+          "strippedTagsCount": 1,
+          "charLength": 138,
+          "isValid": true
+        }
+      },
+      "node-gemini": {
+        title: "Gemini AI LLM Node (Summarization)",
+        badge: "AI INFERENCE • LLM",
+        badgeClass: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+        iconColor: "text-purple-400",
+        subtitle: "gemini-1.5-pro-latest • Sentiment & Incident Classification",
+        description: "Calls Google Gemini 1.5 Pro to synthesize unstructured input into high-density actionable alerts. Extracts sentiment polarity, classifies the incident into standard triage buckets (CRITICAL_INCIDENT, BUG, CHURN_RISK, SUGGESTION), and generates a 2-sentence summary.",
+        params: [
+          { key: "Model", val: "gemini-1.5-pro-latest" },
+          { key: "Temperature", val: "0.2 (Deterministic & Factual)" },
+          { key: "Max Output Tokens", val: "256 tokens" },
+          { key: "Prompt Cache", val: "Enabled (System instruction cached: 88.4% hit)" },
+          { key: "System Instruction", val: "Analyze incident, summarize core issue in 2 sentences, determine category." }
+        ],
+        input: {
+          "prompt": "Analyze incoming event: Postgres connection pool exhausted on master-db-01. Latency spike: 4,820ms (>500ms threshold). 42 queries blocked in queue.",
+          "systemInstruction": "Return JSON with summary, category, and sentiment."
+        },
+        output: {
+          "category": "CRITICAL_INCIDENT",
+          "sentiment": "NEGATIVE_URGENT",
+          "summary": "Master database connection pool exhausted with critical latency spike of 4.8s affecting 42 queued queries. Immediate failover required.",
+          "confidence": 0.98,
+          "tokenUsage": {
+            "promptTokens": 142,
+            "completionTokens": 50,
+            "totalTokens": 192,
+            "costUsd": 0.00004
+          }
+        }
+      },
+      "node-router": {
+        title: "Conditional Router (If / Switch)",
+        badge: "LOGIC • SWITCH",
+        badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+        iconColor: "text-amber-400",
+        subtitle: "Rule Evaluator • 2 Dispatch Target Branches",
+        description: "Evaluates the Gemini LLM output against workflow business rules. Critical incidents and urgent customer churn issues are dynamically steered to Branch A (High-Priority Telegram Ops Bot), while standard suggestions and feedback route to Branch B (Discord Team Channels).",
+        params: [
+          { key: "Condition A", val: "category == 'CRITICAL_INCIDENT' || severity == 'CRITICAL'" },
+          { key: "Target A", val: "Branch A ➔ Ops Telegram Escalation Bot" },
+          { key: "Condition B", val: "DEFAULT (Fallback)" },
+          { key: "Target B", val: "Branch B ➔ Discord #product-feedback Webhook" },
+          { key: "Evaluation Time", val: "4 ms" }
+        ],
+        input: {
+          "category": "CRITICAL_INCIDENT",
+          "severity": "CRITICAL",
+          "sentiment": "NEGATIVE_URGENT"
+        },
+        output: {
+          "evaluatedBranch": "Branch A",
+          "ruleMatched": "Condition A (Critical Path)",
+          "targetChannel": "#incident-triage",
+          "notifyImmediate": true
+        }
+      },
+      "node-action": {
+        title: "Action / Notification (Telegram / Discord)",
+        badge: "ACTION • DISPATCH",
+        badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+        iconColor: "text-emerald-400",
+        subtitle: "Telegram Bot API & Discord Webhook Multi-Channel",
+        description: "Dispatches formatted markdown messages to operational team channels. Formats rich embeds with severity color bars, Gemini AI summaries, direct links to affected clusters, and token usage telemetry.",
+        params: [
+          { key: "Telegram Endpoint", val: "https://api.telegram.org/bot<TOKEN>/sendMessage" },
+          { key: "Telegram Target", val: "Chat ID: -100192841 (@OpsTriageBot)" },
+          { key: "Discord Endpoint", val: "https://discord.com/api/webhooks/982.../tokens" },
+          { key: "Parse Mode", val: "MarkdownV2" },
+          { key: "Retry Strategy", val: "Exponential Backoff (3 retries max)" }
+        ],
+        input: {
+          "targetBranch": "Branch A",
+          "headline": "🚨 CRITICAL_INCIDENT: Postgres Latency Spike (4.8s)",
+          "summary": "Master database connection pool exhausted on master-db-01. 42 queries blocked in queue. Immediate failover required.",
+          "timestamp": "2026-11-06T23:38:12Z"
+        },
+        output: {
+          "telegramStatus": "200 OK",
+          "telegramMessageId": 92841,
+          "discordStatus": "204 No Content (Delivered)",
+          "deliveredAt": "2026-11-06T23:38:12.418Z",
+          "totalPipelineLatency": "304ms"
+        }
+      }
+    };
+
+    // Preset configurations for simulator
+    const presets = {
+      "db-latency": {
+        source: "monitoring.datadog",
+        severity: "CRITICAL",
+        cluster: "ap-southeast-3 (Jakarta)",
+        payload: "Postgres connection pool exhausted on master-db-01. Latency spike: 4,820ms (>500ms threshold). 42 queries blocked in queue. Immediate failover required.",
+        category: "CRITICAL_INCIDENT",
+        headline: "🚨 CRITICAL_INCIDENT: Postgres Latency Spike (4.8s)",
+        summary: "Gemini AI Summary: Master database connection pool exhausted on master-db-01. 42 queries blocked in queue. Immediate failover required.",
+        tokens: 192,
+        branch: "Branch A (Emergency Ops)",
+        channel: "Telegram Bot (@OpsTriageBot)"
+      },
+      "customer-review": {
+        source: "shopify.webhook.review",
+        severity: "HIGH",
+        cluster: "us-east-1 (N. Virginia)",
+        payload: "Terrible experience! Ordered 12 days ago with express shipping (Order #82910) and tracking still says label created. Support bot was completely unhelpful!",
+        category: "CUSTOMER_ESCALATION",
+        headline: "😡 CUSTOMER_ESCALATION: Severe Delivery Delay (Order #82910)",
+        summary: "Gemini AI Summary: Customer reports 12-day shipping delay for express order #82910. High churn risk; requires immediate human support intervention.",
+        tokens: 178,
+        branch: "Branch A (Emergency Ops)",
+        channel: "Telegram Bot (@SupportEscalationBot)"
+      },
+      "feature-req": {
+        source: "feedback.portal",
+        severity: "LOW",
+        cluster: "eu-west-1 (Ireland)",
+        payload: "Loving the new dashboard v1.8! Would be amazing if we could export analytics charts directly into SVG and PDF with dark mode styling.",
+        category: "FEATURE_REQUEST",
+        headline: "💡 FEATURE_REQUEST: SVG & PDF Dark Mode Export",
+        summary: "Gemini AI Summary: User requests capability to export dashboard charts to vector SVG and PDF with native dark mode styling.",
+        tokens: 165,
+        branch: "Branch B (Standard Discord)",
+        channel: "Discord (#product-feedback)"
+      },
+      "api-throttling": {
+        source: "kong.api.gateway",
+        severity: "MEDIUM",
+        cluster: "ap-northeast-1 (Tokyo)",
+        payload: "Client fintech_partner_44 exceeded tier quota of 10,000 req/min (measured: 12,450 req/min). Throttling actively applied.",
+        category: "RATE_LIMIT_WARNING",
+        headline: "⚠️ RATE_LIMIT_WARNING: Client fintech_partner_44 Throttled",
+        summary: "Gemini AI Summary: Partner client throttled after exceeding 10k req/min threshold (12,450 peak). Rate limiting active.",
+        tokens: 172,
+        branch: "Branch B (Standard Discord)",
+        channel: "Discord (#api-alerts)"
+      }
+    };
+
+    // Helper: Show floating toast
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById("n8n-toast");
+      const toastMsg = document.getElementById("toast-message");
+      const toastDot = document.getElementById("toast-dot");
+      if (!toast || !toastMsg) return;
+
+      toastMsg.textContent = message;
+      if (toastDot) {
+        toastDot.className = isSuccess ? "w-2 h-2 rounded-full bg-emerald-400" : "w-2 h-2 rounded-full bg-orange-400";
+      }
+
+      toast.classList.remove("translate-y-20", "opacity-0", "pointer-events-none");
+      toast.classList.add("translate-y-0", "opacity-100");
+
+      setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-20", "opacity-0", "pointer-events-none");
+      }, 3200);
+    }
+
+    // Quick Actions: Top Header Buttons
+    const btnHeaderTrigger = document.getElementById("btn-header-trigger");
+    const btnHeaderLogs = document.getElementById("btn-header-logs");
+    const simulatorSection = document.getElementById("simulator-section");
+    const logsSection = document.getElementById("logs-section");
+
+    if (btnHeaderTrigger && simulatorSection) {
+      btnHeaderTrigger.addEventListener("click", () => {
+        simulatorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        const inputPayload = document.getElementById("input-payload");
+        if (inputPayload) {
+          setTimeout(() => inputPayload.focus(), 500);
+        }
+      });
+    }
+
+    if (btnHeaderLogs && logsSection) {
+      btnHeaderLogs.addEventListener("click", () => {
+        logsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    // Preset Selection Logic
+    const presetButtons = document.querySelectorAll(".btn-preset");
+    const inputSource = document.getElementById("input-source");
+    const inputSeverity = document.getElementById("input-severity");
+    const inputCluster = document.getElementById("input-cluster");
+    const inputPayload = document.getElementById("input-payload");
+
+    let currentPresetKey = "db-latency";
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        presetButtons.forEach((b) => {
+          b.classList.remove("active", "bg-orange-500/10", "border-orange-500/40", "text-orange-300");
+          b.classList.add("bg-zinc-900", "border-zinc-800", "text-zinc-400");
+        });
+
+        btn.classList.add("active", "bg-orange-500/10", "border-orange-500/40", "text-orange-300");
+        btn.classList.remove("bg-zinc-900", "border-zinc-800", "text-zinc-400");
+
+        const key = btn.getAttribute("data-preset");
+        if (key && presets[key]) {
+          currentPresetKey = key;
+          const p = presets[key];
+          if (inputSource) inputSource.value = p.source;
+          if (inputSeverity) inputSeverity.value = p.severity;
+          if (inputCluster) inputCluster.value = p.cluster;
+          if (inputPayload) inputPayload.value = p.payload;
+        }
+      });
+    });
+
+    // Reset Format button
+    const btnFormatJson = document.getElementById("btn-format-json");
+    if (btnFormatJson && presets[currentPresetKey]) {
+      btnFormatJson.addEventListener("click", () => {
+        const p = presets[currentPresetKey];
+        if (inputPayload) inputPayload.value = p.payload;
+        showToast("Payload reset to preset template.");
+      });
+    }
+
+    // Canvas Reset View Button
+    const btnCanvasReset = document.getElementById("btn-canvas-reset");
+    if (btnCanvasReset) {
+      btnCanvasReset.addEventListener("click", () => {
+        showToast("Canvas view centered.");
+      });
+    }
+
+    // Node Inspector Drawer Elements & Handlers
+    const modalNodeInspector = document.getElementById("modal-node-inspector");
+    const btnCloseNodeInspector = document.getElementById("btn-close-node-inspector");
+    const nodeInspectorBackdrop = document.getElementById("node-inspector-backdrop");
+    const workflowNodes = document.querySelectorAll(".workflow-node");
+
+    function openNodeInspector(nodeId) {
+      const data = nodeData[nodeId];
+      if (!data || !modalNodeInspector) return;
+
+      const titleEl = document.getElementById("drawer-node-title");
+      const badgeEl = document.getElementById("drawer-node-badge");
+      const subEl = document.getElementById("drawer-node-subtitle");
+      const descEl = document.getElementById("drawer-config-desc");
+      const paramsContainer = document.getElementById("drawer-config-params");
+      const inputJsonEl = document.getElementById("drawer-input-json");
+      const outputJsonEl = document.getElementById("drawer-output-json");
+
+      if (titleEl) titleEl.textContent = data.title;
+      if (badgeEl) {
+        badgeEl.textContent = data.badge;
+        badgeEl.className = `px-1.5 py-0.5 rounded text-[10px] font-mono font-medium border ${data.badgeClass}`;
+      }
+      if (subEl) subEl.textContent = data.subtitle;
+      if (descEl) descEl.textContent = data.description;
+
+      if (paramsContainer) {
+        paramsContainer.innerHTML = data.params
+          .map(
+            (p) => `<div class="flex items-start justify-between py-1.5 border-b border-zinc-800/80 gap-2">
+            <span class="text-zinc-500 font-medium">${p.key}</span>
+            <span class="text-zinc-200 text-right font-semibold">${p.val}</span>
+          </div>`
+          )
+          .join("");
+      }
+
+      if (inputJsonEl) inputJsonEl.textContent = JSON.stringify(data.input, null, 2);
+      if (outputJsonEl) outputJsonEl.textContent = JSON.stringify(data.output, null, 2);
+
+      modalNodeInspector.classList.remove("hidden");
+    }
+
+    workflowNodes.forEach((node) => {
+      node.addEventListener("click", () => {
+        const nodeId = node.getAttribute("data-node-id");
+        if (nodeId) openNodeInspector(nodeId);
+      });
+    });
+
+    function closeNodeInspector() {
+      if (modalNodeInspector) modalNodeInspector.classList.add("hidden");
+    }
+
+    if (btnCloseNodeInspector) btnCloseNodeInspector.addEventListener("click", closeNodeInspector);
+    if (nodeInspectorBackdrop) nodeInspectorBackdrop.addEventListener("click", closeNodeInspector);
+
+    // Drawer Tabs
+    const drawerTabs = document.querySelectorAll(".drawer-tab");
+    const tabConfig = document.getElementById("tab-content-config");
+    const tabInput = document.getElementById("tab-content-input");
+    const tabOutput = document.getElementById("tab-content-output");
+
+    drawerTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        drawerTabs.forEach((t) => {
+          t.classList.remove("active", "border-b-2", "border-orange-500", "text-orange-400");
+          t.classList.add("text-zinc-400");
+        });
+        tab.classList.add("active", "border-b-2", "border-orange-500", "text-orange-400");
+        tab.classList.remove("text-zinc-400");
+
+        const targetTab = tab.getAttribute("data-tab");
+        if (tabConfig) tabConfig.classList.toggle("hidden", targetTab !== "config");
+        if (tabInput) tabInput.classList.toggle("hidden", targetTab !== "input");
+        if (tabOutput) tabOutput.classList.toggle("hidden", targetTab !== "output");
+      });
+    });
+
+    // Copy Drawer JSON
+    document.querySelectorAll(".btn-copy-drawer-json").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const pre = btn.closest(".space-y-3")?.querySelector("pre");
+        if (pre) {
+          navigator.clipboard.writeText(pre.textContent || "");
+          showToast("Node payload copied to clipboard.");
+        }
+      });
+    });
+
+    // Copy Output JSON Button
+    const btnCopyJson = document.getElementById("btn-copy-json");
+    const outputJsonCode = document.getElementById("output-json-code");
+    if (btnCopyJson && outputJsonCode) {
+      btnCopyJson.addEventListener("click", () => {
+        navigator.clipboard.writeText(outputJsonCode.textContent || "");
+        showToast("Output JSON copied to clipboard.");
+      });
+    }
+
+    // ═══════════════ RUN WORKFLOW SIMULATION ═══════════════
+    const btnRunWorkflow = document.getElementById("btn-run-workflow");
+    const runSpinner = document.getElementById("run-spinner");
+    const runPlayIcon = document.getElementById("run-play-icon");
+    const runBtnLabel = document.getElementById("run-btn-label");
+
+    const progressBar = document.getElementById("execution-progress-bar");
+    const progressPct = document.getElementById("execution-progress-pct");
+    const stageLabel = document.getElementById("execution-stage-label");
+
+    const stepBadges = [
+      document.getElementById("step-1"),
+      document.getElementById("step-2"),
+      document.getElementById("step-3"),
+      document.getElementById("step-4"),
+      document.getElementById("step-5"),
+    ];
+
+    const connectors = [
+      document.querySelector("#connector-1 .connector-glow"),
+      document.querySelector("#connector-2 .connector-glow"),
+      document.querySelector("#connector-3 .connector-glow"),
+      document.querySelector("#connector-4 .connector-glow"),
+    ];
+
+    const canvasStatusText = document.getElementById("canvas-status-text");
+    const canvasTimeText = document.getElementById("canvas-time-text");
+    const metricTotalRuns = document.getElementById("metric-total-runs");
+    const alertHeadline = document.getElementById("alert-headline");
+    const alertSummary = document.getElementById("alert-summary");
+    const alertTime = document.getElementById("alert-time");
+    const outputDurationTag = document.getElementById("output-duration-tag");
+
+    let isRunning = false;
+    let totalRunsCount = 1428;
+
+    if (btnRunWorkflow) {
+      btnRunWorkflow.addEventListener("click", () => {
+        if (isRunning) return;
+        isRunning = true;
+
+        // UI active state
+        btnRunWorkflow.classList.add("opacity-75", "cursor-not-allowed");
+        if (runSpinner) runSpinner.classList.remove("hidden");
+        if (runPlayIcon) runPlayIcon.classList.add("hidden");
+        if (runBtnLabel) runBtnLabel.textContent = "Executing Pipeline...";
+
+        // Reset steps & connectors
+        stepBadges.forEach((b) => {
+          if (b) {
+            b.classList.remove("text-emerald-400", "font-semibold");
+            b.classList.add("text-zinc-500");
+            const icon = b.querySelector(".step-icon");
+            if (icon) icon.className = "step-icon w-3.5 h-3.5 rounded-full border border-zinc-700 flex items-center justify-center text-[9px]";
+          }
+        });
+        connectors.forEach((c) => {
+          if (c) c.classList.remove("opacity-100");
+        });
+
+        const activePreset = presets[currentPresetKey] || presets["db-latency"];
+        const customText = inputPayload ? inputPayload.value.trim() : activePreset.payload;
+        const severityVal = inputSeverity ? inputSeverity.value : activePreset.severity;
+
+        // Step 1: Webhook Received (0 - 20%)
+        if (progressBar) progressBar.style.width = "20%";
+        if (progressPct) progressPct.textContent = "20%";
+        if (stageLabel) stageLabel.textContent = "🟢 Step 1/5: Ingesting Webhook & Authenticating Bearer Token...";
+        if (canvasStatusText) canvasStatusText.textContent = "Worker Active: Ingesting HTTP POST /webhook/v1/user-feedback (12ms)";
+        highlightNode("node-webhook", true);
+        highlightStepBadge(0, true);
+
+        setTimeout(() => {
+          // Step 2: Data Sanitizer & Filter (20% - 40%)
+          highlightNode("node-webhook", false);
+          if (connectors[0]) connectors[0].classList.add("opacity-100");
+          highlightNode("node-sanitizer", true);
+          highlightStepBadge(0, false, true);
+          highlightStepBadge(1, true);
+
+          if (progressBar) progressBar.style.width = "40%";
+          if (progressPct) progressPct.textContent = "40%";
+          if (stageLabel) stageLabel.textContent = "🟢 Step 2/5: Stripping HTML/XSS & Validating Zod Schema...";
+          if (canvasStatusText) canvasStatusText.textContent = "Worker Active: Sanitizing input text & normalizing whitespace (8ms)";
+        }, 120);
+
+        setTimeout(() => {
+          // Step 3: Gemini AI Inference (40% - 70%)
+          highlightNode("node-sanitizer", false);
+          if (connectors[1]) connectors[1].classList.add("opacity-100");
+          highlightNode("node-gemini", true);
+          highlightStepBadge(1, false, true);
+          highlightStepBadge(2, true);
+
+          if (progressBar) progressBar.style.width = "70%";
+          if (progressPct) progressPct.textContent = "70%";
+          if (stageLabel) stageLabel.textContent = "🟢 Step 3/5: Calling Gemini 1.5 Pro (Summarization & Sentiment)...";
+          if (canvasStatusText) canvasStatusText.textContent = `Worker Active: Gemini LLM inference running (~${activePreset.tokens} tokens)`;
+        }, 250);
+
+        setTimeout(() => {
+          // Step 4: Conditional Router (70% - 90%)
+          highlightNode("node-gemini", false);
+          if (connectors[2]) connectors[2].classList.add("opacity-100");
+          highlightNode("node-router", true);
+          highlightStepBadge(2, false, true);
+          highlightStepBadge(3, true);
+
+          if (progressBar) progressBar.style.width = "90%";
+          if (progressPct) progressPct.textContent = "90%";
+          if (stageLabel) stageLabel.textContent = `🟢 Step 4/5: Conditional Router ➔ Steered to ${activePreset.branch}...`;
+          if (canvasStatusText) canvasStatusText.textContent = `Worker Active: Routing logic evaluated: ${activePreset.branch} selected (4ms)`;
+        }, 420);
+
+        setTimeout(() => {
+          // Step 5: Action / Notification (90% - 100%)
+          highlightNode("node-router", false);
+          if (connectors[3]) connectors[3].classList.add("opacity-100");
+          highlightNode("node-action", true);
+          highlightStepBadge(3, false, true);
+          highlightStepBadge(4, true);
+
+          if (progressBar) progressBar.style.width = "100%";
+          if (progressPct) progressPct.textContent = "100%";
+          if (stageLabel) stageLabel.textContent = `🟢 Step 5/5: Notification dispatched to ${activePreset.channel}!`;
+          if (canvasStatusText) canvasStatusText.textContent = `Worker Complete: Alert delivered to ${activePreset.channel} (200 OK)`;
+        }, 580);
+
+        setTimeout(() => {
+          // Execution Completed Finish State
+          highlightNode("node-action", false);
+          highlightStepBadge(4, false, true);
+
+          isRunning = false;
+          btnRunWorkflow.classList.remove("opacity-75", "cursor-not-allowed");
+          if (runSpinner) runSpinner.classList.add("hidden");
+          if (runPlayIcon) runPlayIcon.classList.remove("hidden");
+          if (runBtnLabel) runBtnLabel.textContent = "Run Workflow Now";
+
+          // Update metrics & output JSON
+          totalRunsCount++;
+          if (metricTotalRuns) metricTotalRuns.textContent = totalRunsCount.toLocaleString();
+
+          const now = new Date();
+          const timeStr = now.toTimeString().split(" ")[0];
+          if (alertTime) alertTime.textContent = timeStr;
+          if (alertHeadline) alertHeadline.innerHTML = `🚨 <strong class="text-red-400">${activePreset.category}:</strong> ${severityVal} Alert`;
+          if (alertSummary) alertSummary.textContent = activePreset.summary;
+
+          const durationMs = 280 + Math.floor(Math.random() * 50);
+          if (outputDurationTag) outputDurationTag.textContent = `Duration: ${durationMs}ms`;
+          if (canvasTimeText) canvasTimeText.textContent = `Last executed: Just now (${durationMs}ms)`;
+
+          const resultJson = {
+            status: "SUCCESS",
+            workflowId: `WF-${8093 + (totalRunsCount - 1429)}`,
+            executionTimeMs: durationMs,
+            nodesExecuted: 5,
+            geminiInference: {
+              model: "gemini-1.5-pro-latest",
+              promptTokens: 135 + Math.floor(Math.random() * 15),
+              completionTokens: activePreset.tokens - 135,
+              totalTokens: activePreset.tokens,
+              category: activePreset.category,
+              summary: activePreset.summary.replace("Gemini AI Summary: ", "")
+            },
+            routerDecision: {
+              matchedRule: `severity == '${severityVal}'`,
+              targetBranch: activePreset.branch
+            },
+            dispatcher: {
+              channel: activePreset.channel,
+              messageId: 92842 + (totalRunsCount - 1429),
+              deliveredAt: now.toISOString()
+            }
+          };
+
+          if (outputJsonCode) {
+            outputJsonCode.textContent = JSON.stringify(resultJson, null, 2);
+          }
+
+          // Prepend new row to execution logs table
+          prependLogRow(resultJson.workflowId, activePreset.source, durationMs);
+
+          showToast(`Workflow ${resultJson.workflowId} completed in ${durationMs}ms! Alert dispatched.`);
+        }, 750);
+      });
+    }
+
+    function highlightNode(nodeId, active) {
+      const nodeEl = document.querySelector(`[data-node-id="${nodeId}"]`);
+      if (!nodeEl) return;
+      if (active) {
+        nodeEl.classList.add("ring-2", "ring-orange-400", "scale-102", "shadow-orange-500/30");
+      } else {
+        nodeEl.classList.remove("ring-2", "ring-orange-400", "scale-102", "shadow-orange-500/30");
+      }
+    }
+
+    function highlightStepBadge(index, active, completed = false) {
+      const b = stepBadges[index];
+      if (!b) return;
+      const icon = b.querySelector(".step-icon");
+      if (active) {
+        b.classList.remove("text-zinc-500");
+        b.classList.add("text-orange-400", "font-semibold");
+        if (icon) icon.className = "step-icon w-3.5 h-3.5 rounded-full border border-orange-400 bg-orange-500/20 text-orange-300 flex items-center justify-center text-[9px] animate-pulse";
+      } else if (completed) {
+        b.classList.remove("text-zinc-500", "text-orange-400");
+        b.classList.add("text-emerald-400", "font-semibold");
+        if (icon) icon.className = "step-icon w-3.5 h-3.5 rounded-full border border-emerald-400 bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-[9px]";
+      }
+    }
+
+    // Helper: Prepend row to Recent Execution Logs Table
+    function prependLogRow(wfId, source, durationMs) {
+      const tbody = document.getElementById("logs-table-body");
+      if (!tbody) return;
+
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-zinc-800/40 transition-colors bg-orange-500/5";
+      tr.setAttribute("data-status", "success");
+      tr.innerHTML = `
+        <td class="py-3 px-4 font-medium text-white flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Inbound Event Triage</span>
+          <span class="text-[10px] text-zinc-500 font-normal">#${wfId}</span>
+        </td>
+        <td class="py-3 px-4 text-zinc-400">${source}</td>
+        <td class="py-3 px-4">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            Success
+          </span>
+        </td>
+        <td class="py-3 px-4 text-zinc-300">${durationMs}ms</td>
+        <td class="py-3 px-4 text-zinc-400">Just now</td>
+        <td class="py-3 px-4 text-right">
+          <button type="button" class="btn-inspect-log text-orange-400 hover:text-orange-300 text-xs font-semibold" data-run-id="${wfId}">
+            Inspect Run
+          </button>
+        </td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      // Attach inspect handler to new row
+      const btnInspect = tr.querySelector(".btn-inspect-log");
+      if (btnInspect) {
+        btnInspect.addEventListener("click", () => openRunInspector(wfId, durationMs));
+      }
+    }
+
+    // ═══════════════ RECENT EXECUTION LOGS INSPECTOR & FILTERS ═══════════════
+    const modalRunInspector = document.getElementById("modal-run-inspector");
+    const btnCloseRunInspector = document.getElementById("btn-close-run-inspector");
+    const btnCloseRunInspectorFoot = document.getElementById("btn-close-run-inspector-foot");
+    const runInspectorBackdrop = document.getElementById("run-inspector-backdrop");
+
+    function openRunInspector(runId, durationMs = 304) {
+      if (!modalRunInspector) return;
+
+      const titleEl = document.getElementById("modal-run-id-title");
+      const timeEl = document.getElementById("modal-run-time");
+      const payloadEl = document.getElementById("modal-run-payload");
+
+      if (titleEl) titleEl.textContent = `#${runId}`;
+      if (timeEl) timeEl.textContent = `${durationMs} ms`;
+
+      if (payloadEl) {
+        payloadEl.textContent = JSON.stringify(
+          {
+            runId: runId,
+            status: "COMPLETED_SUCCESS",
+            durationMs: durationMs,
+            trigger: "HTTP POST /webhook/v1/user-feedback",
+            traceWaterfall: {
+              webhookAuthMs: 12,
+              dataSanitizationMs: 8,
+              gemini15ProInferenceMs: durationMs - 74,
+              conditionalRoutingMs: 4,
+              multiDispatchDeliveryMs: 50
+            },
+            geminiTelemetry: {
+              model: "gemini-1.5-pro-latest",
+              tokens: 192,
+              latency: `${durationMs - 74}ms`,
+              cacheStatus: "HIT"
+            },
+            dispatchedAlerts: [
+              { channel: "Telegram @OpsTriageBot", status: 200 },
+              { channel: "Discord #incident-triage", status: 204 }
+            ]
+          },
+          null,
+          2
+        );
+      }
+
+      modalRunInspector.classList.remove("hidden");
+    }
+
+    document.querySelectorAll(".btn-inspect-log").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const runId = btn.getAttribute("data-run-id") || "WF-8092";
+        openRunInspector(runId);
+      });
+    });
+
+    function closeRunInspector() {
+      if (modalRunInspector) modalRunInspector.classList.add("hidden");
+    }
+
+    if (btnCloseRunInspector) btnCloseRunInspector.addEventListener("click", closeRunInspector);
+    if (btnCloseRunInspectorFoot) btnCloseRunInspectorFoot.addEventListener("click", closeRunInspector);
+    if (runInspectorBackdrop) runInspectorBackdrop.addEventListener("click", closeRunInspector);
+
+    // Logs Filtering & Search
+    const logFilterButtons = document.querySelectorAll(".log-filter-btn");
+    const logSearchInput = document.getElementById("log-search-input");
+
+    function applyLogFilters() {
+      const activeBtn = document.querySelector(".log-filter-btn.active");
+      const filterStatus = activeBtn ? activeBtn.getAttribute("data-status") : "all";
+      const query = (logSearchInput ? logSearchInput.value : "").toLowerCase().trim();
+
+      const rows = document.querySelectorAll("#logs-table-body tr");
+      rows.forEach((row) => {
+        const rowStatus = row.getAttribute("data-status");
+        const rowText = row.textContent?.toLowerCase() || "";
+
+        const matchesStatus = filterStatus === "all" || rowStatus === filterStatus;
+        const matchesQuery = !query || rowText.includes(query);
+
+        row.style.display = matchesStatus && matchesQuery ? "" : "none";
+      });
+    }
+
+    logFilterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        logFilterButtons.forEach((b) => {
+          b.classList.remove("active", "bg-zinc-800", "text-white");
+          b.classList.add("text-zinc-400");
+        });
+        btn.classList.add("active", "bg-zinc-800", "text-white");
+        btn.classList.remove("text-zinc-400");
+        applyLogFilters();
+      });
+    });
+
+    if (logSearchInput) {
+      logSearchInput.addEventListener("input", applyLogFilters);
+    }
+
+    // Keyboard ESC shortcut to close any open modal
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeNodeInspector();
+        closeRunInspector();
+      }
+    });
+
+  })();
+</script>

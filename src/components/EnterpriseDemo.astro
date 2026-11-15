@@ -1,0 +1,1567 @@
+---
+// EnterpriseDemo.astro
+// Interactive Production Demo for "Enterprise Management System & REST API"
+// Inspired by Vercel / Linear / Laravel Nova aesthetics.
+// Fully bilingual-ready, role-based access control, CRUD simulation, and REST API inspector.
+---
+
+<div class="enterprise-demo min-h-screen bg-zinc-950 text-zinc-300 font-sans antialiased selection:bg-indigo-500/20 selection:text-indigo-200">
+  
+  <!-- ═══════════════ TOP NAVIGATION / HEADER ═══════════════ -->
+  <header class="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-sm shadow-indigo-500/10">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-white font-semibold text-sm tracking-tight" data-i18n="demo.enterprise.title">EnterpriseCore v2.4 (Production)</span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">LIVE</span>
+            </div>
+            <p class="text-[11px] text-zinc-500 hidden sm:block" data-i18n="demo.enterprise.subtitle">Interactive Enterprise Management System & REST API Control Plane</p>
+          </div>
+        </div>
+
+        <!-- Uptime / Connection Badge -->
+        <div class="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-zinc-800/80">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-mono text-zinc-400" data-i18n="demo.enterprise.badge">API Connected (99.9% Uptime)</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- API Docs Modal Trigger -->
+        <button
+          type="button"
+          id="btn-open-api-docs"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors duration-150 shadow-sm"
+        >
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <span data-i18n="demo.enterprise.apiDocs">API Docs</span>
+        </button>
+
+        <!-- Portfolio Native Language Switcher -->
+        <button
+          type="button"
+          class="lang-toggle-btn inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-mono rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
+          aria-label="Switch language (EN/ID)"
+          title="Switch language"
+        >
+          <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+          </svg>
+          <span class="lang-indicator-en font-semibold text-white">EN</span>
+          <span class="text-zinc-600">/</span>
+          <span class="lang-indicator-id text-zinc-500 font-normal">ID</span>
+        </button>
+
+        <!-- Back to Portfolio Link -->
+        <a
+          href="/#projects"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span data-i18n="demo.enterprise.back">Back to Portfolio</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT CONTAINER ═══════════════ -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    <!-- ── SECTION 1: ROLE-BASED ACCESS CONTROL (RBAC) SWITCHER ── -->
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+          <span class="text-xs font-mono uppercase tracking-wider text-zinc-500">RBAC Identity Switcher</span>
+        </div>
+        <h2 class="text-base sm:text-lg font-semibold text-white tracking-tight mt-1">
+          Role-Based Access Control Simulation
+        </h2>
+        <p class="text-xs text-zinc-400 mt-0.5">
+          Toggle roles in real time to observe dynamic permission scoping, route filtering, and restricted actions.
+        </p>
+      </div>
+
+      <!-- Role Buttons -->
+      <div class="flex items-center p-1 bg-zinc-950/80 border border-zinc-800 rounded-xl" id="role-switcher-container">
+        <button
+          type="button"
+          data-role="admin"
+          class="role-switch-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 bg-indigo-600 text-white shadow-sm shadow-indigo-600/30"
+        >
+          <span>🛡️</span>
+          <span data-i18n="demo.enterprise.roleAdmin">Admin</span>
+        </button>
+        <button
+          type="button"
+          data-role="finance"
+          class="role-switch-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg text-zinc-400 hover:text-zinc-200 transition-all duration-150"
+        >
+          <span>💰</span>
+          <span data-i18n="demo.enterprise.roleFinance">Finance Manager</span>
+        </button>
+        <button
+          type="button"
+          data-role="auditor"
+          class="role-switch-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg text-zinc-400 hover:text-zinc-200 transition-all duration-150"
+        >
+          <span>🔍</span>
+          <span data-i18n="demo.enterprise.roleAuditor">System Auditor</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── DYNAMIC PERMISSION BANNER ── -->
+    <div
+      id="perm-banner"
+      class="flex items-center gap-3 px-4 py-3 rounded-xl border text-xs transition-all duration-200 border-indigo-500/30 bg-indigo-500/5 text-indigo-300"
+    >
+      <div class="p-1 rounded-md bg-indigo-500/20 text-indigo-400 flex-shrink-0" id="perm-banner-icon">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <span class="font-semibold text-white mr-1.5" id="perm-role-label">Active Role: Administrator</span>
+        <span id="perm-banner-text" data-i18n="demo.enterprise.permAdmin">
+          Full administrative access — all modules, CRUD mutations, webhooks, and endpoint tester are authorized.
+        </span>
+      </div>
+      <div class="text-[11px] font-mono text-zinc-500 hidden sm:block" id="perm-scope-badge">
+        Scope: <span class="text-indigo-400 font-semibold">ALL_PERMISSIONS</span>
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: REAL-TIME ANALYTICS & METRICS OVERVIEW CARDS ── -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="metrics-grid">
+      <!-- Metric 1: Active Users -->
+      <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+        <div class="flex items-center justify-between text-zinc-500 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider" data-i18n="demo.enterprise.metricUsers">Active Users / Sessions</span>
+          <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight" id="metric-users-val">
+          2,847
+        </div>
+        <div class="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+          <span>+12.4% vs last hour</span>
+          <span class="text-zinc-500 ml-auto font-mono">JWT / Sanctum</span>
+        </div>
+      </div>
+
+      <!-- Metric 2: DB Query Performance -->
+      <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+        <div class="flex items-center justify-between text-zinc-500 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider" data-i18n="demo.enterprise.metricQuery">Database Query Perf</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight" id="metric-query-val">
+          avg. 24ms
+        </div>
+        <div class="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span id="metric-query-sub">P99: 89ms · 142k queries</span>
+          <span class="text-zinc-500 ml-auto font-mono">MySQL 8.0</span>
+        </div>
+      </div>
+
+      <!-- Metric 3: API Request Throughput -->
+      <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+        <div class="flex items-center justify-between text-zinc-500 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider" data-i18n="demo.enterprise.metricThroughput">API Request Throughput</span>
+          <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight" id="metric-throughput-val">
+          1.2k req/min
+        </div>
+        <div class="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400">
+          <span class="text-zinc-400">0.02% error rate</span>
+          <span class="text-zinc-500 ml-auto font-mono">Nginx + Octane</span>
+        </div>
+      </div>
+
+      <!-- Metric 4: Security Audit Status -->
+      <div id="card-metric-audit" class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+        <div class="flex items-center justify-between text-zinc-500 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider" data-i18n="demo.enterprise.metricAudit">Security Audit Status</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-bold font-mono text-emerald-400 tracking-tight">
+          Passed ✓
+        </div>
+        <div class="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>SOC2 & ISO 27001</span>
+          <span class="text-zinc-500 ml-auto font-mono">2 min ago</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: MAIN WORKSPACE (TABS: RECORDS / API INSPECTOR / AUDIT LOGS) ── -->
+    <section class="border border-zinc-800/80 rounded-2xl bg-zinc-900/40 backdrop-blur-sm overflow-hidden shadow-xl shadow-black/40">
+      
+      <!-- Tab Header Strip -->
+      <div class="flex items-center justify-between border-b border-zinc-800/80 px-4 sm:px-6 bg-zinc-900/60 overflow-x-auto">
+        <div class="flex space-x-1 sm:space-x-2 py-2.5">
+          <button
+            type="button"
+            data-tab="records"
+            class="tab-nav-btn px-4 py-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 text-white shadow-sm flex items-center gap-2"
+          >
+            <span>📋</span>
+            <span data-i18n="demo.enterprise.tabRecords">Records & CRUD</span>
+          </button>
+          
+          <button
+            type="button"
+            id="tab-btn-api"
+            data-tab="api"
+            class="tab-nav-btn px-4 py-2 rounded-lg text-xs font-medium transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 flex items-center gap-2"
+          >
+            <span>⚡</span>
+            <span data-i18n="demo.enterprise.tabApi">REST API Inspector</span>
+          </button>
+
+          <button
+            type="button"
+            data-tab="logs"
+            class="tab-nav-btn px-4 py-2 rounded-lg text-xs font-medium transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 flex items-center gap-2"
+          >
+            <span>📝</span>
+            <span data-i18n="demo.enterprise.tabLogs">Audit Logs</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 ml-1"></span>
+          </button>
+        </div>
+
+        <div class="text-[11px] font-mono text-zinc-500 hidden md:flex items-center gap-2">
+          <span>Engine: Laravel 11.x</span>
+          <span>·</span>
+          <span>Format: JSON:API</span>
+        </div>
+      </div>
+
+      <!-- ── TAB 1: RECORDS & CRUD SIMULATION ── -->
+      <div id="tab-panel-records" class="tab-panel">
+        
+        <!-- Search & Filter Controls -->
+        <div class="p-4 sm:p-5 border-b border-zinc-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-zinc-950/30">
+          <div class="relative flex-1 max-w-md">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              id="records-search"
+              placeholder="Search by ID or description..."
+              data-i18n-placeholder="demo.enterprise.searchPlaceholder"
+              class="w-full pl-10 pr-4 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            />
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Filter Status -->
+            <select
+              id="filter-status"
+              class="px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="" data-i18n="demo.enterprise.filterAllStatus">All Status</option>
+              <option value="completed" data-i18n="demo.enterprise.filterCompleted">Completed</option>
+              <option value="pending" data-i18n="demo.enterprise.filterPending">Pending</option>
+              <option value="failed" data-i18n="demo.enterprise.filterFailed">Failed</option>
+            </select>
+
+            <!-- Filter Type -->
+            <select
+              id="filter-type"
+              class="px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="" data-i18n="demo.enterprise.filterAllTypes">All Types</option>
+              <option value="transaction" data-i18n="demo.enterprise.filterTxn">Transactions</option>
+              <option value="access" data-i18n="demo.enterprise.filterAcl">Access Control</option>
+              <option value="webhook" data-i18n="demo.enterprise.filterWebhook">Webhooks</option>
+            </select>
+
+            <!-- Add Record Button (Admin Only) -->
+            <button
+              type="button"
+              id="btn-add-record"
+              class="px-3.5 py-2 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shadow-indigo-600/30"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span data-i18n="demo.enterprise.addRecord">Add Record</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-zinc-950/60 border-b border-zinc-800/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+              <tr>
+                <th class="px-5 py-3 font-medium" data-i18n="demo.enterprise.thId">Identifier</th>
+                <th class="px-5 py-3 font-medium" data-i18n="demo.enterprise.thType">Type</th>
+                <th class="px-5 py-3 font-medium" data-i18n="demo.enterprise.thDesc">Description</th>
+                <th class="px-5 py-3 font-medium" data-i18n="demo.enterprise.thStatus">Status</th>
+                <th class="px-5 py-3 font-medium" data-i18n="demo.enterprise.thTimestamp">Timestamp</th>
+                <th class="px-5 py-3 font-medium text-right" data-i18n="demo.enterprise.thActions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="records-table-body" class="divide-y divide-zinc-800/50">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="p-4 sm:px-6 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 bg-zinc-950/30">
+          <div id="pagination-info" class="font-mono text-[11px]">
+            Showing 1–6 of 15 records
+          </div>
+          <div class="flex items-center gap-1.5" id="pagination-controls">
+            <!-- Buttons rendered via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 2: REST API ENDPOINT INSPECTOR ── -->
+      <div id="tab-panel-api" class="tab-panel hidden p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+          <div>
+            <h3 class="text-sm font-semibold text-white">Interactive REST API Endpoint Inspector</h3>
+            <p class="text-xs text-zinc-400 mt-0.5">Directly inspect production routes, HTTP headers, status codes, and JSON response bodies.</p>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Base: /api/v1</span>
+        </div>
+
+        <!-- Endpoints Accordion -->
+        <div class="space-y-3" id="api-endpoints-accordion">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ── TAB 3: AUDIT LOGS ── -->
+      <div id="tab-panel-logs" class="tab-panel hidden p-4 sm:p-6 space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+          <div>
+            <h3 class="text-sm font-semibold text-white">Immutable System Audit Trail</h3>
+            <p class="text-xs text-zinc-400 mt-0.5">Append-only compliance log capturing all administrative mutations and session events.</p>
+          </div>
+          <button
+            type="button"
+            id="btn-clear-logs"
+            class="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            Reset Simulator
+          </button>
+        </div>
+
+        <div class="space-y-2 font-mono text-xs" id="audit-logs-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── FOOTER NOTE ── -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500 pt-4 border-t border-zinc-800/60 font-mono">
+      <div>EnterpriseCore v2.4 · Built with Laravel, MySQL, REST API & Tailwind CSS</div>
+      <div>Designed & Developed by Satria Imaniar</div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ GLOBAL MODAL COMPONENT ═══════════════ -->
+  <div
+    id="global-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"
+  >
+    <div
+      class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200"
+      id="modal-box"
+    >
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-zinc-950/50">
+        <h3 id="modal-title" class="text-sm font-semibold text-white flex items-center gap-2">
+          Modal Title
+        </h3>
+        <button
+          type="button"
+          id="btn-close-modal"
+          class="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="modal-content" class="p-5 max-h-[75vh] overflow-y-auto text-xs text-zinc-300">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ═══════════════ CLIENT-SIDE COMPONENT SCRIPT ═════════ -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+  // Self-contained client-side interactive logic for the Enterprise Demo
+
+  // Role permissions matrix
+  const permissions = {
+    admin: {
+      name: "Administrator",
+      scope: "ALL_PERMISSIONS",
+      bannerClass: "border-indigo-500/30 bg-indigo-500/5 text-indigo-300",
+      iconClass: "bg-indigo-500/20 text-indigo-400",
+      permTextEn: "Full administrative access — all modules, CRUD mutations, webhooks, and endpoint tester are authorized.",
+      permTextId: "Akses administratif penuh — seluruh modul, mutasi CRUD, webhook, dan tester endpoint diizinkan.",
+      allowApiTab: true,
+      allowAdd: true,
+      allowEdit: true,
+      allowWebhook: true,
+      allowView: true,
+      showAuditCard: true,
+    },
+    finance: {
+      name: "Finance Manager",
+      scope: "FINANCE_READ_WRITE",
+      bannerClass: "border-amber-500/30 bg-amber-500/5 text-amber-300",
+      iconClass: "bg-amber-500/20 text-amber-400",
+      permTextEn: "Finance scope — view transactions & financial records. System configuration & webhook mutations restricted.",
+      permTextId: "Lingkup keuangan — lihat transaksi & laporan finansial. Konfigurasi sistem dan mutasi webhook dibatasi.",
+      allowApiTab: false,
+      allowAdd: false,
+      allowEdit: false,
+      allowWebhook: false,
+      allowView: true,
+      showAuditCard: false,
+    },
+    auditor: {
+      name: "System Auditor",
+      scope: "AUDIT_READ_ONLY",
+      bannerClass: "border-cyan-500/30 bg-cyan-500/5 text-cyan-300",
+      iconClass: "bg-cyan-500/20 text-cyan-400",
+      permTextEn: "Read-only compliance audit scope — telemetry, system logs, and inspect payload only. Write mutations blocked.",
+      permTextId: "Akses audit kepatuhan baca-saja — hanya telemetri, log sistem, dan inspeksi payload. Mutasi tulis diblokir.",
+      allowApiTab: true,
+      allowAdd: false,
+      allowEdit: false,
+      allowWebhook: false,
+      allowView: true,
+      showAuditCard: true,
+    },
+  };
+
+  let activeRole: "admin" | "finance" | "auditor" = "admin";
+
+  // Enterprise records data set
+  interface EnterpriseRecord {
+    id: string;
+    type: "transaction" | "access" | "webhook";
+    desc: string;
+    status: "completed" | "pending" | "failed";
+    ts: string;
+    amount?: number;
+    actor?: string;
+  }
+
+  let records: EnterpriseRecord[] = [
+    { id: "TXN-9842", type: "transaction", desc: "Wire transfer to Subsidiary #4 — Jakarta", status: "completed", ts: "2026-11-05 10:12:33", amount: 45000, actor: "finance@enterprise.co" },
+    { id: "TXN-9841", type: "transaction", desc: "Monthly payroll disbursement — HQ Core", status: "completed", ts: "2026-11-05 09:45:01", amount: 128000, actor: "payroll_bot" },
+    { id: "ACL-2211", type: "access", desc: "User role escalation: viewer → editor (dev-ops)", status: "pending", ts: "2026-11-05 09:30:17", actor: "satria@enterprise.co" },
+    { id: "WHK-0087", type: "webhook", desc: "Slack dispatch — Deployment pipeline trigger #184", status: "completed", ts: "2026-11-05 09:15:44", actor: "github_actions" },
+    { id: "TXN-9840", type: "transaction", desc: "Vendor invoice payment — Cloud Infrastructure", status: "failed", ts: "2026-11-05 08:58:22", amount: 7200, actor: "billing_worker" },
+    { id: "ACL-2210", type: "access", desc: "API key rotation: service-account-prod-vault", status: "completed", ts: "2026-11-05 08:30:00", actor: "vault_agent" },
+    { id: "WHK-0086", type: "webhook", desc: "PagerDuty alert — Memory threshold exceeded (92%)", status: "failed", ts: "2026-11-05 08:15:11", actor: "datadog_agent" },
+    { id: "TXN-9839", type: "transaction", desc: "Enterprise license renewal — 2026 Infrastructure Stack", status: "completed", ts: "2026-11-05 07:50:33", amount: 24500, actor: "finance@enterprise.co" },
+    { id: "ACL-2209", type: "access", desc: "Enforce MFA policy — All organizational administrators", status: "completed", ts: "2026-11-04 23:12:45", actor: "sec_officer" },
+    { id: "WHK-0085", type: "webhook", desc: "Webhook trigger — Docker container auto-restart", status: "completed", ts: "2026-11-04 22:40:19", actor: "portainer" },
+    { id: "TXN-9838", type: "transaction", desc: "Office lease payment Q4 — Regional Hub Surabaya", status: "pending", ts: "2026-11-04 21:00:00", amount: 15000, actor: "finance@enterprise.co" },
+    { id: "ACL-2208", type: "access", desc: "Provision new service account: k8s-sync-worker", status: "completed", ts: "2026-11-04 20:30:55", actor: "satria@enterprise.co" },
+    { id: "TXN-9837", type: "transaction", desc: "Marketing campaign budget allocation — SEA Expansion", status: "completed", ts: "2026-11-04 18:15:30", amount: 35000, actor: "finance@enterprise.co" },
+    { id: "WHK-0084", type: "webhook", desc: "Datadog healthcheck metric ingestion", status: "completed", ts: "2026-11-04 17:22:11", actor: "datadog_agent" },
+    { id: "ACL-2207", type: "access", desc: "Revoke legacy OAuth2 token for decommissioned node", status: "completed", ts: "2026-11-04 16:05:00", actor: "sec_officer" },
+  ];
+
+  // Audit Logs
+  let auditLogs = [
+    { time: "10:28:41", type: "AUTH", msg: "Session authenticated via Bearer token (admin@enterprise.co)", status: "OK" },
+    { time: "10:25:12", type: "SYS", msg: "Automated snapshot backup verified: 2.4 GB to cold storage", status: "OK" },
+    { time: "10:18:04", type: "NET", msg: "Cloudflare tunnel sync healthy (node: toshiba-l645)", status: "OK" },
+    { time: "10:12:33", type: "TXN", msg: "Transaction TXN-9842 verified and locked in ledger", status: "OK" },
+    { time: "09:45:01", type: "BATCH", msg: "Batch worker dispatched 128 payroll entries without errors", status: "OK" },
+  ];
+
+  function pushLog(type: string, msg: string, status: "OK" | "WARN" | "DENIED" = "OK") {
+    const now = new Date();
+    const time = now.toTimeString().slice(0, 8);
+    auditLogs.unshift({ time, type, msg, status });
+    renderAuditLogs();
+  }
+
+  // API Endpoints Specification
+  const endpoints = [
+    {
+      method: "GET",
+      path: "/api/v1/enterprise/metrics",
+      title: "Get Real-time System Metrics",
+      desc: "Retrieve live telemetry including active sessions, query latency, and throughput.",
+      status: 200,
+      headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI...",
+        "Accept": "application/json",
+        "X-Request-ID": "req_99a8f2",
+      },
+      response: {
+        success: true,
+        data: {
+          active_sessions: 2847,
+          db_query_latency_ms: 24,
+          p99_latency_ms: 89,
+          requests_per_minute: 1240,
+          memory_footprint_mb: 412,
+          security_audit: "passed",
+        },
+        meta: {
+          timestamp: "2026-11-05T10:28:41Z",
+          cached: false,
+          elapsed_ms: 18,
+        },
+      },
+    },
+    {
+      method: "POST",
+      path: "/api/v1/audit/logs",
+      title: "Emit Compliance Audit Entry",
+      desc: "Write an immutable event entry to the enterprise regulatory compliance trail.",
+      status: 201,
+      headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI...",
+        "Content-Type": "application/json",
+      },
+      body: {
+        event: "role.escalated",
+        actor_id: "usr_8829",
+        target_id: "usr_1024",
+        details: { from: "viewer", to: "editor" },
+      },
+      response: {
+        success: true,
+        data: {
+          log_id: "LOG-99214",
+          created_at: "2026-11-05T10:28:41.102Z",
+          immutable_hash: "sha256:7b91e...c90a1",
+        },
+      },
+    },
+    {
+      method: "GET",
+      path: "/api/v1/users?role=admin&status=active",
+      title: "Query Filtered User Accounts",
+      desc: "Fetch paginated user records matching specified role and lifecycle status.",
+      status: 200,
+      headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI...",
+        "Accept": "application/json",
+      },
+      response: {
+        success: true,
+        data: [
+          { id: 1, name: "Satria Imaniar", email: "admin@enterprise.co", role: "admin", mfa_enabled: true },
+          { id: 2, name: "Finance Director", email: "finance@enterprise.co", role: "finance_manager", mfa_enabled: true },
+        ],
+        pagination: { page: 1, per_page: 20, total: 2 },
+      },
+    },
+    {
+      method: "PUT",
+      path: "/api/v1/enterprise/settings",
+      title: "Mutate Enterprise Policy Configuration",
+      desc: "Update organization-wide security and rate limiting policies.",
+      status: 200,
+      headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI...",
+        "Content-Type": "application/json",
+      },
+      body: {
+        mfa_enforced: true,
+        session_timeout_seconds: 1800,
+        ip_whitelist: ["10.0.0.0/8", "192.168.1.0/24"],
+      },
+      response: {
+        success: true,
+        message: "Enterprise security policies applied immediately.",
+        meta: { applied_at: "2026-11-05T10:28:41Z", restart_required: false },
+      },
+    },
+    {
+      method: "DELETE",
+      path: "/api/v1/sessions/{id}",
+      title: "Revoke Active Session Token",
+      desc: "Terminate an active user JWT session immediately from the Redis session cache.",
+      status: 200,
+      headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI...",
+        "X-Request-ID": "req_revoke_44",
+      },
+      response: {
+        success: true,
+        message: "Session token invalidated and blacklisted.",
+        revoked_at: "2026-11-05T10:28:41Z",
+      },
+    },
+  ];
+
+  // Pagination state
+  const pageSize = 6;
+  let currentPage = 1;
+  let searchQuery = "";
+  let statusFilter = "";
+  let typeFilter = "";
+
+  // Helper: syntax highlighting for JSON
+  function formatJSON(obj: any): string {
+    const json = JSON.stringify(obj, null, 2);
+    return json
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+        let cls = "text-amber-400";
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) {
+            cls = "text-indigo-400 font-semibold";
+          } else {
+            cls = "text-emerald-400";
+          }
+        } else if (/true|false/.test(match)) {
+          cls = "text-cyan-400";
+        } else if (/null/.test(match)) {
+          cls = "text-zinc-500";
+        }
+        return `<span class="${cls}">${match}</span>`;
+      });
+  }
+
+  // Render Table
+  function renderTable() {
+    const tbody = document.getElementById("records-table-body");
+    const info = document.getElementById("pagination-info");
+    const controls = document.getElementById("pagination-controls");
+    if (!tbody || !info || !controls) return;
+
+    // Filter records
+    const filtered = records.filter((r) => {
+      const matchSearch =
+        !searchQuery ||
+        r.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.desc.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      const matchType = !typeFilter || r.type === typeFilter;
+      return matchSearch && matchStatus && matchType;
+    });
+
+    const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    const startIdx = (currentPage - 1) * pageSize;
+    const pageRecords = filtered.slice(startIdx, startIdx + pageSize);
+
+    // Update info text
+    const endIdx = Math.min(startIdx + pageSize, filtered.length);
+    const lang = document.documentElement.getAttribute("lang") || "en";
+    info.textContent =
+      lang === "id"
+        ? `Menampilkan ${filtered.length > 0 ? startIdx + 1 : 0}–${endIdx} dari ${filtered.length} data`
+        : `Showing ${filtered.length > 0 ? startIdx + 1 : 0}–${endIdx} of ${filtered.length} records`;
+
+    // Render Rows
+    if (pageRecords.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="px-5 py-12 text-center text-zinc-500 font-mono text-xs">
+            No matching records found.
+          </td>
+        </tr>
+      `;
+    } else {
+      const rolePerm = permissions[activeRole];
+
+      tbody.innerHTML = pageRecords
+        .map((r) => {
+          // Status badge
+          let statusBadge = "";
+          if (r.status === "completed") {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ Completed</span>`;
+          } else if (r.status === "pending") {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">⏳ Pending</span>`;
+          } else {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-red-500/10 text-red-400 border border-red-500/20">✕ Failed</span>`;
+          }
+
+          // Type badge
+          let typeIcon = "💳";
+          let typeLabel = "Transaction";
+          if (r.type === "access") {
+            typeIcon = "🔑";
+            typeLabel = "Access Control";
+          } else if (r.type === "webhook") {
+            typeIcon = "🔗";
+            typeLabel = "Webhook";
+          }
+
+          // Actions based on active role
+          let actionsHtml = `<div class="flex items-center justify-end gap-1.5">`;
+
+          // View Payload is always allowed
+          actionsHtml += `
+            <button
+              type="button"
+              data-action="view"
+              data-id="${r.id}"
+              class="px-2 py-1 text-[11px] font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+            >
+              Payload
+            </button>
+          `;
+
+          // Edit is allowed for admin only
+          if (rolePerm.allowEdit) {
+            actionsHtml += `
+              <button
+                type="button"
+                data-action="edit"
+                data-id="${r.id}"
+                class="px-2 py-1 text-[11px] font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+              >
+                Edit
+              </button>
+            `;
+          }
+
+          // Trigger Webhook is allowed for admin on webhook rows
+          if (rolePerm.allowWebhook && r.type === "webhook") {
+            actionsHtml += `
+              <button
+                type="button"
+                data-action="trigger"
+                data-id="${r.id}"
+                class="px-2 py-1 text-[11px] font-medium text-indigo-400 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded transition-colors"
+              >
+                Trigger
+              </button>
+            `;
+          }
+
+          actionsHtml += `</div>`;
+
+          return `
+            <tr class="hover:bg-zinc-800/30 transition-colors">
+              <td class="px-5 py-3 font-mono font-medium text-indigo-400">${r.id}</td>
+              <td class="px-5 py-3">
+                <span class="inline-flex items-center gap-1.5 text-zinc-300">
+                  <span>${typeIcon}</span>
+                  <span class="capitalize">${typeLabel}</span>
+                </span>
+              </td>
+              <td class="px-5 py-3 text-zinc-300 max-w-xs truncate">${r.desc}</td>
+              <td class="px-5 py-3">${statusBadge}</td>
+              <td class="px-5 py-3 font-mono text-zinc-500">${r.ts}</td>
+              <td class="px-5 py-3 text-right">${actionsHtml}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    // Render Pagination Controls
+    let pagesHtml = `
+      <button
+        type="button"
+        id="btn-prev-page"
+        ${currentPage <= 1 ? "disabled" : ""}
+        class="px-2.5 py-1 text-xs rounded border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+      >
+        ←
+      </button>
+    `;
+
+    for (let p = 1; p <= totalPages; p++) {
+      const isActive = p === currentPage;
+      pagesHtml += `
+        <button
+          type="button"
+          data-page="${p}"
+          class="page-num-btn px-2.5 py-1 text-xs rounded border ${
+            isActive
+              ? "border-indigo-500 bg-indigo-500/20 text-indigo-300 font-semibold"
+              : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white"
+          } transition-colors"
+        >
+          ${p}
+        </button>
+      `;
+    }
+
+    pagesHtml += `
+      <button
+        type="button"
+        id="btn-next-page"
+        ${currentPage >= totalPages ? "disabled" : ""}
+        class="px-2.5 py-1 text-xs rounded border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+      >
+        →
+      </button>
+    `;
+
+    controls.innerHTML = pagesHtml;
+
+    // Attach listeners
+    document.getElementById("btn-prev-page")?.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+
+    document.getElementById("btn-next-page")?.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    });
+
+    controls.querySelectorAll(".page-num-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const targetPage = Number((e.currentTarget as HTMLElement).getAttribute("data-page"));
+        if (targetPage && targetPage !== currentPage) {
+          currentPage = targetPage;
+          renderTable();
+        }
+      });
+    });
+
+    // Row action buttons
+    tbody.querySelectorAll("button[data-action]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const action = (e.currentTarget as HTMLElement).getAttribute("data-action");
+        const id = (e.currentTarget as HTMLElement).getAttribute("data-id");
+        if (action === "view" && id) openPayloadModal(id);
+        if (action === "edit" && id) openEditModal(id);
+        if (action === "trigger" && id) openTriggerModal(id);
+      });
+    });
+  }
+
+  // Render REST API Inspector Accordion
+  function renderApiAccordion() {
+    const container = document.getElementById("api-endpoints-accordion");
+    if (!container) return;
+
+    container.innerHTML = endpoints
+      .map((ep, idx) => {
+        let methodColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        if (ep.method === "POST") methodColor = "bg-blue-500/10 text-blue-400 border-blue-500/30";
+        if (ep.method === "PUT") methodColor = "bg-amber-500/10 text-amber-400 border-amber-500/30";
+        if (ep.method === "DELETE") methodColor = "bg-red-500/10 text-red-400 border-red-500/30";
+
+        return `
+          <div class="border border-zinc-800/80 rounded-xl bg-zinc-950/40 overflow-hidden">
+            <!-- Accordion Header -->
+            <button
+              type="button"
+              data-endpoint-toggle="${idx}"
+              class="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/20 transition-colors"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${methodColor}">
+                  ${ep.method}
+                </span>
+                <span class="font-mono text-xs font-semibold text-zinc-200 truncate">
+                  ${ep.path}
+                </span>
+                <span class="text-xs text-zinc-500 hidden md:inline truncate">
+                  — ${ep.title}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                  ${ep.status} OK
+                </span>
+                <svg class="w-4 h-4 text-zinc-400 transition-transform duration-200" id="accordion-arrow-${idx}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </button>
+
+            <!-- Accordion Details (Hidden by default, index 0 open) -->
+            <div id="accordion-body-${idx}" class="${idx === 0 ? "" : "hidden"} p-4 sm:p-5 border-t border-zinc-800/80 bg-zinc-950/80 space-y-4">
+              <p class="text-xs text-zinc-400">${ep.desc}</p>
+              
+              <!-- Headers Section -->
+              <div>
+                <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Request Headers</span>
+                <div class="mt-1.5 p-3 rounded-lg bg-zinc-900 border border-zinc-800 font-mono text-[11px] space-y-1">
+                  ${Object.entries(ep.headers)
+                    .map(([k, v]) => `<div><span class="text-indigo-400 font-semibold">${k}:</span> <span class="text-zinc-300">${v}</span></div>`)
+                    .join("")}
+                </div>
+              </div>
+
+              <!-- Request Body if present -->
+              ${
+                ep.body
+                  ? `
+                <div>
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Request Payload (JSON)</span>
+                  <pre class="mt-1.5 p-3 rounded-lg bg-zinc-900 border border-zinc-800 font-mono text-[11px] overflow-x-auto text-zinc-300"><code>${formatJSON(
+                    ep.body
+                  )}</code></pre>
+                </div>
+              `
+                  : ""
+              }
+
+              <!-- Response Body -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Mock JSON Response (${ep.status})</span>
+                  <button
+                    type="button"
+                    data-copy-curl="${idx}"
+                    class="text-[11px] font-mono text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                  >
+                    <span>📋</span>
+                    <span>Copy cURL</span>
+                  </button>
+                </div>
+                <pre class="p-3.5 rounded-lg bg-zinc-900 border border-zinc-800 font-mono text-[11px] overflow-x-auto text-zinc-300 leading-relaxed"><code>${formatJSON(
+                  ep.response
+                )}</code></pre>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    // Hook up accordion toggles
+    container.querySelectorAll("button[data-endpoint-toggle]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const idx = (e.currentTarget as HTMLElement).getAttribute("data-endpoint-toggle");
+        const body = document.getElementById(`accordion-body-${idx}`);
+        const arrow = document.getElementById(`accordion-arrow-${idx}`);
+        if (body && arrow) {
+          const isHidden = body.classList.toggle("hidden");
+          arrow.style.transform = isHidden ? "" : "rotate(180deg)";
+        }
+      });
+    });
+
+    // Copy cURL handlers
+    container.querySelectorAll("button[data-copy-curl]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const idx = Number((e.currentTarget as HTMLElement).getAttribute("data-copy-curl"));
+        const ep = endpoints[idx];
+        const curlCmd = `curl -X ${ep.method} "https://api.enterprise.co${ep.path}" \\\n  -H "Authorization: ${ep.headers.Authorization}" \\\n  -H "Accept: application/json"`;
+        navigator.clipboard.writeText(curlCmd).then(() => {
+          const label = (e.currentTarget as HTMLElement).querySelector("span:last-child");
+          if (label) {
+            const oldText = label.textContent;
+            label.textContent = "Copied!";
+            setTimeout(() => {
+              label.textContent = oldText;
+            }, 1500);
+          }
+        });
+        pushLog("API", `Inspected and copied cURL for ${ep.method} ${ep.path}`);
+      });
+    });
+  }
+
+  // Render Audit Logs
+  function renderAuditLogs() {
+    const container = document.getElementById("audit-logs-container");
+    if (!container) return;
+
+    container.innerHTML = auditLogs
+      .map((log) => {
+        let badgeColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+        if (log.status === "WARN") badgeColor = "text-amber-400 bg-amber-500/10 border-amber-500/20";
+        if (log.status === "DENIED") badgeColor = "text-red-400 bg-red-500/10 border-red-500/20";
+
+        return `
+          <div class="flex items-start gap-3 p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60 hover:border-zinc-700/60 transition-colors">
+            <span class="text-zinc-500 font-mono text-[11px] whitespace-nowrap">${log.time}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono border ${badgeColor}">${log.type}</span>
+            <span class="text-zinc-300 flex-1 leading-relaxed text-xs">${log.msg}</span>
+            <span class="text-[10px] font-mono text-zinc-500">${log.status}</span>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  // Switch Active RBAC Role
+  function setRole(role: "admin" | "finance" | "auditor") {
+    activeRole = role;
+    const rolePerm = permissions[role];
+    const lang = document.documentElement.getAttribute("lang") || "en";
+
+    // Update Role Switcher Buttons
+    document.querySelectorAll(".role-switch-btn").forEach((btn) => {
+      const r = btn.getAttribute("data-role");
+      if (r === role) {
+        btn.className =
+          "role-switch-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 bg-indigo-600 text-white shadow-sm shadow-indigo-600/30";
+      } else {
+        btn.className =
+          "role-switch-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg text-zinc-400 hover:text-zinc-200 transition-all duration-150";
+      }
+    });
+
+    // Update Banner
+    const banner = document.getElementById("perm-banner");
+    const roleLabel = document.getElementById("perm-role-label");
+    const bannerText = document.getElementById("perm-banner-text");
+    const scopeBadge = document.getElementById("perm-scope-badge");
+
+    if (banner) {
+      banner.className = `flex items-center gap-3 px-4 py-3 rounded-xl border text-xs transition-all duration-200 ${rolePerm.bannerClass}`;
+    }
+    if (roleLabel) {
+      roleLabel.textContent = `Active Role: ${rolePerm.name}`;
+    }
+    if (bannerText) {
+      bannerText.textContent = lang === "id" ? rolePerm.permTextId : rolePerm.permTextEn;
+    }
+    if (scopeBadge) {
+      scopeBadge.innerHTML = `Scope: <span class="font-semibold">${rolePerm.scope}</span>`;
+    }
+
+    // Toggle Add Record button visibility
+    const btnAdd = document.getElementById("btn-add-record");
+    if (btnAdd) {
+      btnAdd.style.display = rolePerm.allowAdd ? "inline-flex" : "none";
+    }
+
+    // Toggle API Inspector Tab
+    const tabApiBtn = document.getElementById("tab-btn-api");
+    if (tabApiBtn) {
+      tabApiBtn.style.display = rolePerm.allowApiTab ? "inline-flex" : "none";
+    }
+
+    // If currently in API tab and role doesn't allow it, fallback to records
+    const panelApi = document.getElementById("tab-panel-api");
+    if (!rolePerm.allowApiTab && panelApi && !panelApi.classList.contains("hidden")) {
+      switchTab("records");
+    }
+
+    // Toggle Audit Card
+    const auditCard = document.getElementById("card-metric-audit");
+    if (auditCard) {
+      auditCard.style.opacity = rolePerm.showAuditCard ? "1" : "0.3";
+      auditCard.style.filter = rolePerm.showAuditCard ? "none" : "grayscale(100%)";
+    }
+
+    // Re-render table with new action buttons
+    renderTable();
+
+    // Log the event
+    pushLog("RBAC", `Switched identity context to ${rolePerm.name} (${rolePerm.scope})`);
+  }
+
+  // Tab switching logic
+  function switchTab(tabId: "records" | "api" | "logs") {
+    document.querySelectorAll(".tab-nav-btn").forEach((btn) => {
+      const target = btn.getAttribute("data-tab");
+      if (target === tabId) {
+        btn.className =
+          "tab-nav-btn px-4 py-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 text-white shadow-sm flex items-center gap-2";
+      } else {
+        btn.className =
+          "tab-nav-btn px-4 py-2 rounded-lg text-xs font-medium transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 flex items-center gap-2";
+      }
+    });
+
+    document.querySelectorAll(".tab-panel").forEach((panel) => {
+      panel.classList.add("hidden");
+    });
+
+    const activePanel = document.getElementById(`tab-panel-${tabId}`);
+    if (activePanel) {
+      activePanel.classList.remove("hidden");
+    }
+
+    pushLog("NAV", `Navigated to workspace panel: ${tabId.toUpperCase()}`);
+  }
+
+  // Modal helpers
+  const modal = document.getElementById("global-modal");
+  const modalBox = document.getElementById("modal-box");
+  const modalTitle = document.getElementById("modal-title");
+  const modalContent = document.getElementById("modal-content");
+  const btnCloseModal = document.getElementById("btn-close-modal");
+
+  function openModal(title: string, contentHtml: string) {
+    if (!modal || !modalBox || !modalTitle || !modalContent) return;
+    modalTitle.innerHTML = title;
+    modalContent.innerHTML = contentHtml;
+    modal.classList.remove("hidden");
+    setTimeout(() => {
+      modal.classList.remove("opacity-0");
+      modalBox.classList.remove("scale-95");
+      modalBox.classList.add("scale-100");
+    }, 10);
+  }
+
+  function closeModal() {
+    if (!modal || !modalBox) return;
+    modal.classList.add("opacity-0");
+    modalBox.classList.remove("scale-100");
+    modalBox.classList.add("scale-95");
+    setTimeout(() => {
+      modal.classList.add("hidden");
+    }, 200);
+  }
+
+  btnCloseModal?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Action: Open Payload Modal
+  function openPayloadModal(id: string) {
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+
+    const payload = {
+      record_id: record.id,
+      system_type: record.type,
+      description: record.desc,
+      status: record.status,
+      timestamp: record.ts,
+      actor: record.actor || "system",
+      details: record.amount ? { amount_usd: record.amount, currency: "USD", cleared: true } : { processed: true },
+      security_hash: `sha256:${record.id.toLowerCase()}_99a1b`,
+      _links: {
+        self: `/api/v1/records/${record.id}`,
+        audit: `/api/v1/audit/logs?ref=${record.id}`,
+      },
+    };
+
+    openModal(
+      `<span class="text-indigo-400">📦</span> Record Payload: ${record.id}`,
+      `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-2 border-b border-zinc-800">
+            <span>GET /api/v1/records/${record.id}</span>
+            <span class="text-emerald-400">200 OK (14ms)</span>
+          </div>
+          <pre class="p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-[11px] overflow-x-auto text-zinc-300 leading-relaxed"><code>${formatJSON(
+            payload
+          )}</code></pre>
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              id="btn-copy-payload"
+              class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+            >
+              Copy JSON
+            </button>
+            <button
+              type="button"
+              id="btn-dismiss-modal"
+              class="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-800 rounded-lg transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      `
+    );
+
+    document.getElementById("btn-copy-payload")?.addEventListener("click", () => {
+      navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).then(() => {
+        const btn = document.getElementById("btn-copy-payload");
+        if (btn) btn.textContent = "Copied!";
+        setTimeout(() => {
+          if (btn) btn.textContent = "Copy JSON";
+        }, 1500);
+      });
+    });
+
+    document.getElementById("btn-dismiss-modal")?.addEventListener("click", closeModal);
+    pushLog("PAYLOAD", `Inspected JSON payload for ${record.id}`);
+  }
+
+  // Action: Open Edit Modal
+  function openEditModal(id: string) {
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+
+    openModal(
+      `<span class="text-amber-400">✏️</span> Edit Record: ${record.id}`,
+      `
+        <form id="form-edit-record" class="space-y-4">
+          <div>
+            <label class="block text-zinc-400 text-xs mb-1 font-mono">Description</label>
+            <input
+              type="text"
+              id="edit-desc"
+              value="${record.desc}"
+              required
+              class="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-zinc-400 text-xs mb-1 font-mono">Status</label>
+            <select
+              id="edit-status"
+              class="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="completed" ${record.status === "completed" ? "selected" : ""}>Completed</option>
+              <option value="pending" ${record.status === "pending" ? "selected" : ""}>Pending</option>
+              <option value="failed" ${record.status === "failed" ? "selected" : ""}>Failed</option>
+            </select>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+            <button
+              type="button"
+              id="btn-edit-cancel"
+              class="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-white bg-zinc-800 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      `
+    );
+
+    document.getElementById("btn-edit-cancel")?.addEventListener("click", closeModal);
+
+    document.getElementById("form-edit-record")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newDesc = (document.getElementById("edit-desc") as HTMLInputElement).value;
+      const newStatus = (document.getElementById("edit-status") as HTMLSelectElement).value as any;
+
+      record.desc = newDesc;
+      record.status = newStatus;
+      renderTable();
+      closeModal();
+      pushLog("CRUD", `Updated record ${record.id}: description & status (${newStatus})`);
+    });
+  }
+
+  // Action: Open Trigger Webhook Modal
+  function openTriggerModal(id: string) {
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+
+    openModal(
+      `<span class="text-indigo-400">🔗</span> Trigger Webhook Dispatch: ${record.id}`,
+      `
+        <div class="space-y-4">
+          <p class="text-xs text-zinc-300">
+            Dispatch an asynchronous HTTP POST event payload to the target subscriber URL.
+          </p>
+
+          <div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-[11px] space-y-1 text-zinc-400">
+            <div><span class="text-indigo-400">POST</span> /api/v1/webhooks/${record.id}/dispatch</div>
+            <div><span class="text-zinc-500">Target:</span> https://hooks.slack.com/services/...</div>
+            <div><span class="text-zinc-500">Retry Count:</span> 0/3 · Timeout: 5000ms</div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              id="btn-trigger-cancel"
+              class="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-white bg-zinc-800 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              id="btn-trigger-confirm"
+              class="px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+            >
+              Confirm Dispatch
+            </button>
+          </div>
+        </div>
+      `
+    );
+
+    document.getElementById("btn-trigger-cancel")?.addEventListener("click", closeModal);
+
+    document.getElementById("btn-trigger-confirm")?.addEventListener("click", () => {
+      record.status = "completed";
+      renderTable();
+      closeModal();
+      pushLog("WEBHOOK", `Dispatched webhook ${record.id} with status 200 OK`);
+    });
+  }
+
+  // Action: Open Add Record Modal
+  document.getElementById("btn-add-record")?.addEventListener("click", () => {
+    openModal(
+      `<span class="text-emerald-400">➕</span> Add New Enterprise Record`,
+      `
+        <form id="form-add-record" class="space-y-4">
+          <div>
+            <label class="block text-zinc-400 text-xs mb-1 font-mono">Record Type</label>
+            <select
+              id="new-type"
+              class="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="transaction">Transaction (Ledger)</option>
+              <option value="access">Access Control (ACL)</option>
+              <option value="webhook">Webhook Dispatch</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-zinc-400 text-xs mb-1 font-mono">Description</label>
+            <input
+              type="text"
+              id="new-desc"
+              placeholder="e.g. Database schema migration executed"
+              required
+              class="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+            <button
+              type="button"
+              id="btn-add-cancel"
+              class="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-white bg-zinc-800 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+            >
+              Create Record
+            </button>
+          </div>
+        </form>
+      `
+    );
+
+    document.getElementById("btn-add-cancel")?.addEventListener("click", closeModal);
+
+    document.getElementById("form-add-record")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const type = (document.getElementById("new-type") as HTMLSelectElement).value as any;
+      const desc = (document.getElementById("new-desc") as HTMLInputElement).value;
+      const randNum = Math.floor(1000 + Math.random() * 9000);
+      const prefix = type === "transaction" ? "TXN" : type === "access" ? "ACL" : "WHK";
+      const newId = `${prefix}-${randNum}`;
+      const now = new Date();
+      const ts = now.toISOString().replace("T", " ").slice(0, 19);
+
+      records.unshift({
+        id: newId,
+        type,
+        desc,
+        status: "completed",
+        ts,
+        actor: "admin@enterprise.co",
+      });
+
+      renderTable();
+      closeModal();
+      pushLog("CRUD", `Created new record: ${newId} (${type})`);
+    });
+  });
+
+  // Action: Open API Docs Modal
+  document.getElementById("btn-open-api-docs")?.addEventListener("click", () => {
+    openModal(
+      `<span class="text-indigo-400">📖</span> EnterpriseCore API Documentation (v2.4)`,
+      `
+        <div class="space-y-4">
+          <p class="text-xs text-zinc-300">
+            EnterpriseCore provides RESTful endpoints designed around JSON:API conventions. Every mutation is tracked in an append-only audit ledger.
+          </p>
+
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Base URL & Protocols</span>
+            <div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-xs text-emerald-400">
+              https://api.enterprise.co/v1
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Authentication</span>
+            <p class="text-xs text-zinc-400">All requests require Bearer token authorization in the HTTP headers:</p>
+            <pre class="p-3 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-[11px] text-zinc-300"><code>Authorization: Bearer &lt;YOUR_API_TOKEN&gt;
+Accept: application/json
+Content-Type: application/json</code></pre>
+          </div>
+
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Rate Limits & SLAs</span>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                <div class="text-zinc-500">Standard Tier</div>
+                <div class="text-white font-mono font-semibold">1,200 req/min</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                <div class="text-zinc-500">Production SLA</div>
+                <div class="text-emerald-400 font-mono font-semibold">99.9% Uptime</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button
+              type="button"
+              id="btn-docs-close"
+              class="px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      `
+    );
+
+    document.getElementById("btn-docs-close")?.addEventListener("click", closeModal);
+    pushLog("DOCS", "Consulted official API documentation specification");
+  });
+
+  // Reset Simulator
+  document.getElementById("btn-clear-logs")?.addEventListener("click", () => {
+    auditLogs = [
+      { time: new Date().toTimeString().slice(0, 8), type: "RESET", msg: "Simulator state re-initialized", status: "OK" },
+    ];
+    renderAuditLogs();
+  });
+
+  // Search & Filter event listeners
+  document.getElementById("records-search")?.addEventListener("input", (e) => {
+    searchQuery = (e.target as HTMLInputElement).value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById("filter-status")?.addEventListener("change", (e) => {
+    statusFilter = (e.target as HTMLSelectElement).value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById("filter-type")?.addEventListener("change", (e) => {
+    typeFilter = (e.target as HTMLSelectElement).value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Role button listeners
+  document.querySelectorAll(".role-switch-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const role = (e.currentTarget as HTMLElement).getAttribute("data-role") as any;
+      if (role) setRole(role);
+    });
+  });
+
+  // Tab button listeners
+  document.querySelectorAll(".tab-nav-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const tab = (e.currentTarget as HTMLElement).getAttribute("data-tab") as any;
+      if (tab) switchTab(tab);
+    });
+  });
+
+  // Real-time metrics drift simulation (Every 4 seconds)
+  setInterval(() => {
+    const usersEl = document.getElementById("metric-users-val");
+    const queryEl = document.getElementById("metric-query-val");
+    const querySub = document.getElementById("metric-query-sub");
+    const tpEl = document.getElementById("metric-throughput-val");
+
+    if (usersEl) {
+      const delta = Math.floor(Math.random() * 9) - 4;
+      const current = parseInt(usersEl.textContent?.replace(/,/g, "") || "2847", 10);
+      usersEl.textContent = (current + delta).toLocaleString();
+    }
+
+    if (queryEl && querySub) {
+      const latency = 22 + Math.floor(Math.random() * 5);
+      queryEl.textContent = `avg. ${latency}ms`;
+      querySub.textContent = `P99: ${84 + Math.floor(Math.random() * 8)}ms · 142k queries`;
+    }
+
+    if (tpEl) {
+      const val = (1.18 + Math.random() * 0.08).toFixed(2);
+      tpEl.textContent = `${val}k req/min`;
+    }
+  }, 4000);
+
+  // Sync with Portfolio language change event
+  window.addEventListener("portfolio-lang-change", () => {
+    setRole(activeRole);
+    renderTable();
+  });
+
+  // Initialize
+  setRole("admin");
+  renderTable();
+  renderApiAccordion();
+  renderAuditLogs();
+</script>
+

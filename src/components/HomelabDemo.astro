@@ -1,0 +1,1754 @@
+---
+// HomelabDemo.astro
+// Interactive Production Demo for "Self-Hosted Home Server & Cloud Infrastructure"
+// Aesthetic inspired by Homarr, Uptime Kuma, and Vercel dark mode.
+// Features: CGNAT Bypass Architecture Visualizer, Service Health Check Grid,
+// Live System Telemetry Gauges, and Interactive Simulated Server Terminal Stream.
+---
+
+<div class="homelab-demo min-h-screen bg-zinc-950 text-zinc-300 font-sans antialiased selection:bg-emerald-500/20 selection:text-emerald-200">
+
+  <!-- ═══════════════ TOP HEADER & GLOBAL NODE STATUS ═══════════════ -->
+  <header class="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+      
+      <!-- Brand & Node Identifier -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm shadow-emerald-500/10">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-white font-semibold text-sm tracking-tight" data-i18n="demo.homelab.nodeTitle">
+              Production Node: toshiba-l645 (Bare-Metal HomeLab)
+            </span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              BARE-METAL
+            </span>
+          </div>
+           <p class="text-[11px] text-zinc-500 hidden sm:block" data-i18n="demo.homelab.nodeSubtitle">
+            Ubuntu 22.04 LTS • Linux 5.15 • Docker 24.0.7
+            </p>
+          </div>
+
+        <!-- Global Status Badge -->
+        <div class="hidden xl:flex items-center gap-2 ml-4 pl-4 border-l border-zinc-800/80">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-mono text-emerald-400" data-i18n="demo.homelab.badge">
+            🟢 All Systems Operational (99.7% 30-day Uptime)
+          </span>
+        </div>
+
+      </div>
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Test Tunnel Latency Button -->
+        <button
+          type="button"
+          id="btn-test-latency"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors duration-150 shadow-sm"
+          title="Run diagnostic ping against Cloudflare Tunnel & Nginx endpoints"
+        >
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"></path>
+          </svg>
+          <span data-i18n="demo.homelab.testLatency">Test Tunnel Latency</span>
+        </button>
+
+        <!-- Toggle Live Stream Button -->
+        <button
+          type="button"
+          id="btn-toggle-stream"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
+          title="Toggle live telemetry & log streaming"
+        >
+          <span class="relative flex h-2 w-2">
+            <span id="stream-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span id="stream-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span id="stream-label" class="font-mono text-[11px] font-semibold">LIVE</span>
+        </button>
+
+        <!-- Language Switcher -->
+        <button
+          type="button"
+          class="lang-toggle-btn inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-mono rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
+          aria-label="Switch language (EN/ID)"
+          title="Switch language"
+        >
+          <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+          </svg>
+          <span class="lang-indicator-en font-semibold text-white">EN</span>
+          <span class="text-zinc-600">/</span>
+          <span class="lang-indicator-id text-zinc-500 font-normal">ID</span>
+        </button>
+
+        <!-- Back to Portfolio Link -->
+        <a
+          href="/#projects"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span data-i18n="demo.homelab.back">Back to Portfolio</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT CONTAINER ═══════════════ -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- ── SYSTEM METADATA STRIP ── -->
+     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 text-xs    font-mono">
+      <div class="flex items-center gap-2">
+        <span class="text-zinc-500">Host:</span>
+        <span class="text-zinc-200 font-medium">toshiba-l645</span>
+      </div>
+    <div class="flex items-center gap-2">
+        <span class="text-zinc-500">IP (LAN):</span>
+        <span class="text-zinc-200">192.168.1.100</span>
+        <span class="text-[10px] px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">CGNAT</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-zinc-500">Kernel:</span>
+        <span class="text-zinc-200">Linux 5.15.0-107</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-zinc-500">Uptime:</span>
+        <span class="text-emerald-400 font-semibold" id="sys-uptime-val">42d 18h 24m</span>
+      </div>
+    </div>
+
+    <!-- ── SECTION 1: LIVE SYSTEM TELEMETRY & RESOURCE METRICS ── -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-mono uppercase tracking-wider text-zinc-500">Bare-Metal Telemetry</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-semibold text-white tracking-tight mt-0.5" data-i18n="demo.homelab.telemetryTitle">
+            Live System Telemetry & Resource Metrics
+          </h2>
+        </div>
+
+        <!-- Sync Ticker -->
+        <div class="flex items-center gap-2.5 text-xs font-mono text-zinc-400 bg-zinc-900/60 border border-zinc-800/80 px-3 py-1.5 rounded-xl">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="ticker-text">Last synced: <span class="text-zinc-200">just now</span></span>
+          <span class="text-zinc-600">•</span>
+          <span class="text-zinc-500 text-[11px]" id="countdown-text">refreshes in 30s</span>
+          <button
+            type="button"
+            id="btn-sync-now"
+            class="text-zinc-400 hover:text-white transition-colors ml-1 p-0.5"
+            title="Sync metrics immediately"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="telemetry-grid">
+        
+        <!-- Metric 1: CPU Core Load -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+          <div class="flex items-center justify-between text-zinc-500 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">CPU Core Load</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-bold font-mono text-white tracking-tight" id="metric-cpu-val">19%</span>
+            <span class="text-xs text-zinc-400 font-mono">utilization</span>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="w-full bg-zinc-800 rounded-full h-2 mt-3 overflow-hidden">
+            <div id="bar-cpu" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-500" style="width: 19%"></div>
+          </div>
+
+          <div class="flex items-center justify-between mt-2.5 text-[11px] text-zinc-400 font-mono">
+            <span>4 Cores Active</span>
+            <span class="text-emerald-400">Temp: ~46°C</span>
+          </div>
+          
+          <!-- Core Micro-bars -->
+          <div class="grid grid-cols-4 gap-1.5 mt-3 pt-2.5 border-t border-zinc-800/60">
+            <div>
+              <div class="flex justify-between text-[10px] text-zinc-500 font-mono mb-1">
+                <span>C0</span><span id="c0-val">22%</span>
+              </div>
+              <div class="w-full bg-zinc-800/80 rounded-full h-1">
+                <div id="c0-bar" class="bg-emerald-500 h-1 rounded-full" style="width: 22%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-[10px] text-zinc-500 font-mono mb-1">
+                <span>C1</span><span id="c1-val">17%</span>
+              </div>
+              <div class="w-full bg-zinc-800/80 rounded-full h-1">
+                <div id="c1-bar" class="bg-emerald-500 h-1 rounded-full" style="width: 17%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-[10px] text-zinc-500 font-mono mb-1">
+                <span>C2</span><span id="c2-val">19%</span>
+              </div>
+              <div class="w-full bg-zinc-800/80 rounded-full h-1">
+                <div id="c2-bar" class="bg-emerald-500 h-1 rounded-full" style="width: 19%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-[10px] text-zinc-500 font-mono mb-1">
+                <span>C3</span><span id="c3-val">18%</span>
+              </div>
+              <div class="w-full bg-zinc-800/80 rounded-full h-1">
+                <div id="c3-bar" class="bg-emerald-500 h-1 rounded-full" style="width: 18%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric 2: Memory (RAM) -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+          <div class="flex items-center justify-between text-zinc-500 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Memory (RAM)</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                <line x1="6" y1="18" x2="6" y2="21"></line>
+                <line x1="10" y1="18" x2="10" y2="21"></line>
+                <line x1="14" y1="18" x2="14" y2="21"></line>
+                <line x1="18" y1="18" x2="18" y2="21"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-bold font-mono text-white tracking-tight" id="metric-ram-val">3.4 GB</span>
+            <span class="text-xs text-zinc-400 font-mono">/ 8.0 GB</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-zinc-800 rounded-full h-2 mt-3 overflow-hidden">
+            <div id="bar-ram" class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-2 rounded-full transition-all duration-500" style="width: 42.5%"></div>
+          </div>
+
+          <div class="flex items-center justify-between mt-2.5 text-[11px] text-zinc-400 font-mono">
+            <span class="text-emerald-400 font-medium">Optimized (42.5%)</span>
+            <span>Swap: 512M / 4G</span>
+          </div>
+
+          <!-- Sub-breakdown -->
+          <div class="mt-3 pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <span>Cached: 1.8 GB</span>
+            <span>Free: 2.8 GB</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: Storage (NVMe/SSD) -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+          <div class="flex items-center justify-between text-zinc-500 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Storage (NVMe/SSD)</span>
+            <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-bold font-mono text-white tracking-tight" id="metric-storage-val">187 GB</span>
+            <span class="text-xs text-zinc-400 font-mono">/ 500 GB</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-zinc-800 rounded-full h-2 mt-3 overflow-hidden">
+            <div id="bar-storage" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 37.4%"></div>
+          </div>
+
+          <div class="flex items-center justify-between mt-2.5 text-[11px] text-zinc-400 font-mono">
+            <span>37.4% Used (ext4)</span>
+            <span class="text-emerald-400">Health: PASSED</span>
+          </div>
+
+          <!-- Sub-breakdown -->
+          <div class="mt-3 pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <span>Docker: 45 GB</span>
+            <span>I/O: 420 IOPS</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Active Containers -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group">
+          <div class="flex items-center justify-between text-zinc-500 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Active Containers</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-bold font-mono text-emerald-400 tracking-tight" id="metric-containers-val">13</span>
+            <span class="text-xs text-zinc-400 font-mono">running / 0 stopped</span>
+          </div>
+
+          <!-- Status bar indicators -->
+          <div class="flex items-center gap-1 mt-3">
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+            <span class="flex-1 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+
+          <div class="flex items-center justify-between mt-2.5 text-[11px] text-zinc-400 font-mono">
+            <span class="text-emerald-400">100% Health Score</span>
+            <span>Daemon: active</span>
+          </div>
+
+          <!-- Sub-breakdown -->
+          <div class="mt-3 pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <span>Net: dockernet</span>
+            <span>Driver: overlay2</span>
+          </div>
+        </div>
+      </div>
+    </section> 
+    <!-- ── SECTION 2: INTERACTIVE ARCHITECTURE / NETWORK VISUALIZER (CGNAT BYPASS) ── -->
+    <section class="p-6 sm:p-7 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span class="text-xs font-mono uppercase tracking-wider text-zinc-500">Zero-Trust Network Topology</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-semibold text-white tracking-tight mt-0.5" data-i18n="demo.homelab.archTitle">
+            Interactive Architecture / Network Visualizer (CGNAT Bypass)
+          </h2>
+          <p class="text-xs text-zinc-400 mt-1 max-w-2xl" data-i18n="demo.homelab.archSubtitle">
+            Traffic flows securely from public clients through Cloudflare Zero-Trust Tunnels directly to local Nginx Proxy Manager and isolated Docker containers — completely bypassing ISP CGNAT with zero port forwarding.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 self-start sm:self-auto text-[11px] font-mono text-zinc-400 bg-zinc-950/70 border border-zinc-800/80 px-3 py-1.5 rounded-lg">
+          <span class="text-zinc-500">Click any node to inspect rules & SSL</span>
+        </div>
+      </div>
+
+      <!-- Flow Sequence Cards (4 Hops) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 relative">
+        
+        <!-- Node 1: Internet (CGNAT) -->
+        <div
+          class="arch-node-card cursor-pointer p-4 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-emerald-500/50 transition-all duration-200 relative group ring-2 ring-emerald-500/40"
+          data-node="cgnat"
+          id="arch-card-cgnat"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Hop 1 • Ingress</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300">Public</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-white">Internet (CGNAT)</h3>
+              <p class="text-[11px] font-mono text-zinc-400">Client HTTPS Request</p>
+            </div>
+          </div>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+            Public clients request domain. Home ISP blocks all inbound ports (100.64.0.0/10 CGNAT pool).
+          </p>
+          <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>TLS 1.3 Handshake</span>
+            <span class="text-emerald-400 font-medium">Inspect ➔</span>
+          </div>
+        </div>
+
+        <!-- Node 2: Cloudflare Tunnel (Zero-Trust) -->
+        <div
+          class="arch-node-card cursor-pointer p-4 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-emerald-500/50 transition-all duration-200 relative group"
+          data-node="cloudflare"
+          id="arch-card-cloudflare"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-500/90">Hop 2 • Edge Tunnel</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">Zero-Trust</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-white">Cloudflare Tunnel</h3>
+              <p class="text-[11px] font-mono text-zinc-400">Outbound QUIC (CGK Edge)</p>
+            </div>
+          </div>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+            Daemon maintains persistent outbound tunnel to Cloudflare Edge. Zero router port forwarding needed.
+          </p>
+          <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>WAF & DDoS Shield</span>
+            <span class="text-zinc-400 group-hover:text-emerald-400 transition-colors">Inspect ➔</span>
+          </div>
+        </div>
+
+        <!-- Node 3: Nginx Proxy Manager (Reverse Proxy) -->
+        <div
+          class="arch-node-card cursor-pointer p-4 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-emerald-500/50 transition-all duration-200 relative group"
+          data-node="nginx"
+          id="arch-card-nginx"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-400">Hop 3 • Ingress</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Port 443</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-white">Nginx Proxy Manager</h3>
+              <p class="text-[11px] font-mono text-zinc-400">Reverse Proxy & SSL</p>
+            </div>
+          </div>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+            SNI host-based routing, Let's Encrypt Wildcard SSL offloading, and WebSocket header upgrades.
+          </p>
+          <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>SSL Wildcard Active</span>
+            <span class="text-zinc-400 group-hover:text-emerald-400 transition-colors">Inspect ➔</span>
+          </div>
+        </div>
+
+        <!-- Node 4: Docker Containers Stack -->
+        <div
+          class="arch-node-card cursor-pointer p-4 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-emerald-500/50 transition-all duration-200 relative group"
+          data-node="docker"
+          id="arch-card-docker"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-400">Hop 4 • Target</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Internal</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-white">Docker Containers</h3>
+              <p class="text-[11px] font-mono text-zinc-400">172.18.0.0/16 Bridge</p>
+            </div>
+          </div>
+          <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+            Target microservices (n8n, Homarr, Uptime Kuma) listening strictly on isolated internal container ports.
+          </p>
+          <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>13 Containers</span>
+            <span class="text-zinc-400 group-hover:text-emerald-400 transition-colors">Inspect ➔</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Node Inspector Drawer / Box -->
+      <div id="arch-inspector-panel" class="rounded-xl border border-zinc-800 bg-zinc-950/80 p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+          <div class="flex items-center gap-3">
+            <span id="inspect-tag" class="px-2 py-0.5 rounded text-xs font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              INGRESS NODE
+            </span>
+            <h3 id="inspect-title" class="text-sm font-semibold text-white">
+              Internet (CGNAT) ➔ Cloudflare Edge Traffic Flow
+            </h3>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-mono text-zinc-400">
+            <span>Status: <strong id="inspect-status" class="text-emerald-400 font-medium">Bypassed & Encrypted</strong></span>
+            <span class="text-zinc-600">•</span>
+            <span>Protocol: <strong id="inspect-protocol" class="text-zinc-200">QUIC (HTTP/3)</strong></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+          <!-- Column 1: Bypass Mechanics -->
+          <div class="space-y-1.5 p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
+            <span class="text-[11px] text-zinc-500 uppercase tracking-wider">CGNAT Bypass Mechanics</span>
+            <p id="inspect-mechanics" class="text-zinc-300 font-sans leading-relaxed text-xs">
+              ISP assigns a private IP (100.64.0.0/10) to the router WAN, making port-forwarding impossible. The host creates an outbound-only tunnel to Cloudflare Edge PoP, eliminating the need for any static public IP or open firewall port.
+            </p>
+          </div>
+
+          <!-- Column 2: Active SSL Details -->
+          <div class="space-y-1.5 p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
+            <span class="text-[11px] text-zinc-500 uppercase tracking-wider">Active SSL / TLS Certificate</span>
+            <div class="space-y-1 text-zinc-300">
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Issuer:</span>
+                <span id="inspect-ssl-issuer" class="text-emerald-400">Let's Encrypt / CF Edge</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Subject:</span>
+                <span id="inspect-ssl-subject">*.satriaimaniar.my.id</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Cipher:</span>
+                <span id="inspect-ssl-cipher">TLS_AES_256_GCM_SHA384</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Expiry:</span>
+                <span id="inspect-ssl-expiry" class="text-zinc-400">Auto-renews (82 days left)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Live Routing Rules -->
+          <div class="space-y-1.5 p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/60">
+            <span class="text-[11px] text-zinc-500 uppercase tracking-wider">Routing Rules & Ingress</span>
+            <div class="space-y-1 text-zinc-300">
+              <div class="flex justify-between">
+                <span class="text-zinc-500">n8n:</span>
+                <span class="text-zinc-200">n8n.satriaimaniar.my.id ➔ :5678</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Homarr:</span>
+                <span class="text-zinc-200">homarr.satriaimaniar.my.id ➔ :7575</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">Uptime:</span>
+                <span class="text-zinc-200">status.satriaimaniar.my.id ➔ :3001</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-500">NPM UI:</span>
+                <span class="text-zinc-200">Local Only (192.168.1.100:81)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Snippet Preview -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1.5">
+            <span id="code-snippet-title">cloudflared / config.yml</span>
+            <button
+              type="button"
+              id="btn-copy-config"
+              class="hover:text-white transition-colors text-[10px] text-emerald-400 flex items-center gap-1"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+              </svg>
+              <span>Copy Configuration</span>
+            </button>
+          </div>
+          <pre id="code-snippet-body" class="p-3 rounded-lg bg-black/60 border border-zinc-800/80 font-mono text-xs text-emerald-400/90 overflow-x-auto leading-relaxed">tunnel: 7c89f2a1-e408-4e12-b18a-93f8d1c8f102
+credentials-file: /root/.cloudflared/7c89f2a1.json
+ingress:
+  - hostname: n8n.satriaimaniar.my.id
+    service: https://172.18.0.2:443
+    originRequest:
+      noTLSVerify: true
+  - hostname: homarr.satriaimaniar.my.id
+    service: https://172.18.0.2:443
+    originRequest:
+      noTLSVerify: true
+  - service: http_status:404</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: SERVICE HEALTH CHECK GRID (ACTIVE CONTAINERS) ── -->
+     <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-mono uppercase tracking-wider text-zinc-500">Container Fleet</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-semibold text-white tracking-tight mt-0.5" data-i18n="demo.homelab.servicesTitle">
+            Service Health Check Grid (Active Containers)
+          </h2>
+          <p class="text-xs text-zinc-400 mt-0.5" data-i18n="demo.homelab.servicesSubtitle">
+            Live heartbeat checks, container health state, and real-time round-trip latency across the Docker stack.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>6/6 Core Services UP</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Services Grid (6 Cards) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="services-grid">
+        
+        <!-- Service 1: Nginx Proxy Manager -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">Nginx Proxy Manager</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Port 443 (SSL Ingress)</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              UP
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Reverse proxy router managing virtual hosts, wildcard SSL certificates, and WebSocket traffic streams.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Latency: <span class="text-emerald-400 font-semibold service-latency" data-target="npm">12ms</span></div>
+            <div>SSL: <span class="text-zinc-200">Let's Encrypt</span></div>
+            <div>Hosts: <span class="text-zinc-200">11 Active</span></div>
+            <div>Uptime: <span class="text-zinc-200">99.9%</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="npm"
+            >
+              <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Ping (12ms)</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="npm"
+              title="Simulate service reload"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+
+        <!-- Service 2: Docker Engine -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">Docker Engine</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Daemon Active (v24.0.7)</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              ACTIVE
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Container orchestration runtime managing lifecycle, resource quotas, and isolated bridge networks.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Containers: <span class="text-emerald-400 font-semibold">13 running</span></div>
+            <div>Driver: <span class="text-zinc-200">overlay2</span></div>
+            <div>Stopped: <span class="text-zinc-200">0</span></div>
+            <div>Sock: <span class="text-zinc-200">/var/run/docker</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="docker"
+            >
+              <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Health Check</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="docker"
+              title="Inspect Docker daemon"
+            >
+              Inspect
+            </button>
+          </div>
+        </div>
+
+        <!-- Service 3: n8n Workflow Automation -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">n8n Automation</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Port 5678 (Webhooks)</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              UP
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Autonomous event-driven pipeline orchestrating AI summaries, webhook triggers, and scheduled jobs.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Latency: <span class="text-emerald-400 font-semibold service-latency" data-target="n8n">45ms</span></div>
+            <div>Workflows: <span class="text-zinc-200">8 Active</span></div>
+            <div>Executions: <span class="text-zinc-200">1,420 runs</span></div>
+            <div>Mode: <span class="text-zinc-200">Queue / Redis</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="n8n"
+            >
+              <svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Ping (45ms)</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="n8n"
+              title="Test webhook execution"
+            >
+              Trigger
+            </button>
+          </div>
+        </div>
+
+        <!-- Service 4: Homarr Dashboard -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">Homarr Dashboard</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Port 7575 (Control Portal)</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              UP
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Unified HomeLab control plane providing quick application tiles, service status indicators, and bookmarking.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Latency: <span class="text-emerald-400 font-semibold service-latency" data-target="homarr">6ms</span></div>
+            <div>Tiles: <span class="text-zinc-200">16 Integrated</span></div>
+            <div>Widgets: <span class="text-zinc-200">Docker + Ping</span></div>
+            <div>RAM: <span class="text-zinc-200">145 MB</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="homarr"
+            >
+              <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Ping (6ms)</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="homarr"
+              title="Simulate service reload"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+
+        <!-- Service 5: Cloudflare Tunnel -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">Cloudflare Tunnel</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Secure Edge Connector</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              CONNECTED
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Zero-Trust outbound tunnel carrying encrypted client traffic from Cloudflare's nearest edge datacenter.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Latency: <span class="text-emerald-400 font-semibold service-latency" data-target="cloudflare">18ms</span></div>
+            <div>Edge PoP: <span class="text-zinc-200">CGK (Jakarta)</span></div>
+            <div>Protocol: <span class="text-zinc-200">QUIC (HTTP/3)</span></div>
+            <div>Routes: <span class="text-zinc-200">4 Active</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="cloudflare"
+            >
+              <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Ping (18ms)</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="cloudflare"
+              title="Test Tunnel Route"
+            >
+              Route
+            </button>
+          </div>
+        </div>
+
+        <!-- Service 6: Uptime Kuma -->
+        <div class="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 group relative">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">Uptime Kuma</h3>
+                <p class="text-[11px] font-mono text-zinc-500">Port 3001 (Monitoring)</p>
+              </div>
+            </div>
+            <span class="service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              UP
+            </span>
+          </div>
+
+          <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+            Continuous synthetic monitoring platform verifying HTTP status codes, certificate expiry, and ping times.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400 pt-3 border-t border-zinc-800/60 mb-4">
+            <div>Latency: <span class="text-emerald-400 font-semibold service-latency" data-target="kuma">5ms</span></div>
+            <div>Probes: <span class="text-zinc-200">14 Targets</span></div>
+            <div>Interval: <span class="text-zinc-200">20s probe</span></div>
+            <div>Incidents: <span class="text-emerald-400">0 (30d)</span></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="btn-ping-service flex-1 py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/60 transition-colors flex items-center justify-center gap-1"
+              data-service="kuma"
+            >
+              <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Ping (5ms)</span>
+            </button>
+            <button
+              type="button"
+              class="btn-restart-service py-1.5 px-2.5 text-xs font-mono rounded-lg bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+              data-service="kuma"
+              title="Trigger synthetic probe"
+            >
+              Probe
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section> 
+
+    <!-- ── SECTION 4: SIMULATED SERVER LOGS & TERMINAL STREAM ── -->
+    <section class="border border-zinc-800/80 rounded-2xl bg-zinc-900/40 backdrop-blur-sm overflow-hidden shadow-xl shadow-black/40">
+      
+      <!-- Terminal Window Header -->
+      <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-zinc-800/80 bg-zinc-900/70">
+        <div class="flex items-center gap-2">
+          <!-- Terminal Controls (macOS / Linux style) -->
+          <div class="flex items-center gap-1.5 mr-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+          </div>
+          <span class="font-mono text-xs text-zinc-300 font-medium">
+            satria@toshiba-l645:~# journalctl -u cloudflared -u nginx -u docker -f
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="terminal-stream-status">STREAMING</span>
+          </div>
+
+          <!-- Clear Terminal -->
+          <button
+            type="button"
+            id="btn-clear-logs"
+            class="text-zinc-400 hover:text-white transition-colors text-xs font-mono p-1"
+            title="Clear terminal buffer"
+          >
+            Clear
+          </button>
+
+          <!-- Copy Logs -->
+          <button
+            type="button"
+            id="btn-copy-logs"
+            class="text-zinc-400 hover:text-white transition-colors text-xs font-mono p-1 flex items-center gap-1"
+            title="Copy logs to clipboard"
+          >
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls Strip -->
+      <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 border-b border-zinc-800/60 bg-zinc-950/60 text-xs font-mono">
+        <div class="flex items-center gap-1 overflow-x-auto py-0.5" id="log-filter-buttons">
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded bg-zinc-800 text-white font-medium" data-filter="all">All</button>
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40" data-filter="cloudflared">cloudflared</button>
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40" data-filter="nginx">nginx</button>
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40" data-filter="docker">dockerd</button>
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40" data-filter="kuma">uptime-kuma</button>
+          <button type="button" class="log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40" data-filter="n8n">n8n</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Live Auto-Scroll Toggle -->
+          <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-zinc-400 select-none">
+            <input type="checkbox" id="chk-autoscroll" checked class="rounded border-zinc-700 text-emerald-500 focus:ring-0 bg-zinc-900" />
+            <span>Auto-scroll</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Terminal Output Screen -->
+      <div
+        id="terminal-body"
+        class="p-4 sm:p-5 font-mono text-xs bg-black/90 text-zinc-300 h-80 overflow-y-auto space-y-1.5 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-100"
+      >
+        <!-- Initial Log Entries -->
+        <div class="log-line text-zinc-500" data-source="system">
+          [23:10:00] [system] Linux toshiba-l645 5.15.0-107-generic x86_64 SMP Thu Oct 17 2026
+        </div>
+        <div class="log-line" data-source="cloudflared">
+          <span class="text-zinc-500">[23:10:01]</span> <span class="text-cyan-400">[cloudflared]</span> <span class="text-emerald-400">INF</span> Tunnel connection established connIndex=0 location=CGK (Jakarta) protocol=quic ip=198.41.200.193
+        </div>
+        <div class="log-line" data-source="cloudflared">
+          <span class="text-zinc-500">[23:10:02]</span> <span class="text-cyan-400">[cloudflared]</span> <span class="text-emerald-400">INF</span> Ingress rule active: *.satriaimaniar.my.id ➔ https://172.18.0.2:443 (originRequest: noTLSVerify=true)
+        </div>
+        <div class="log-line" data-source="nginx">
+          <span class="text-zinc-500">[23:10:04]</span> <span class="text-emerald-400">[nginx]</span> <span class="text-zinc-400">NOTICE</span> 142#142: SSL certificate verified for *.satriaimaniar.my.id (Issuer: Let's Encrypt Authority X3)
+        </div>
+        <div class="log-line" data-source="nginx">
+          <span class="text-zinc-500">[23:10:05]</span> <span class="text-emerald-400">[nginx]</span> <span class="text-emerald-400">NOTICE</span> 142#142: configuration reloaded successfully, worker processes 148 active
+        </div>
+        <div class="log-line" data-source="docker">
+          <span class="text-zinc-500">[23:10:08]</span> <span class="text-blue-400">[dockerd]</span> <span class="text-zinc-300">INFO</span> Container e91bf4d13a94 (n8n-automation) health check status: healthy (142ms)
+        </div>
+        <div class="log-line" data-source="docker">
+          <span class="text-zinc-500">[23:10:10]</span> <span class="text-blue-400">[dockerd]</span> <span class="text-zinc-300">INFO</span> Container a47f8c021e5b (homarr-dashboard) memory: 145 MB / 512 MB limit
+        </div>
+        <div class="log-line" data-source="kuma">
+          <span class="text-zinc-500">[23:10:12]</span> <span class="text-emerald-400">[uptime-kuma]</span> <span class="text-emerald-400">HEARTBEAT</span> https://npm.home.lab [200 OK] roundtrip: 12ms packet_loss: 0%
+        </div>
+        <div class="log-line" data-source="kuma">
+          <span class="text-zinc-500">[23:10:15]</span> <span class="text-emerald-400">[uptime-kuma]</span> <span class="text-emerald-400">HEARTBEAT</span> https://n8n.satriaimaniar.my.id [200 OK] roundtrip: 45ms
+        </div>
+        <div class="log-line" data-source="n8n">
+          <span class="text-zinc-500">[23:10:19]</span> <span class="text-rose-400">[n8n]</span> <span class="text-zinc-300">INFO</span> Trigger [Webhook-Router] received payload from 172.18.0.2 (status: 200, executionId=1421)
+        </div>
+        <div class="log-line" data-source="cloudflared">
+          <span class="text-zinc-500">[23:10:24]</span> <span class="text-cyan-400">[cloudflared]</span> <span class="text-emerald-400">INF</span> Zero-Trust edge policy evaluated: allow bypass for valid mTLS / Token
+        </div>
+      </div>
+
+      <!-- Interactive Terminal Command Input -->
+      <div class="flex items-center px-4 py-2.5 border-t border-zinc-800/80 bg-zinc-950 text-xs font-mono">
+        <span class="text-emerald-400 font-semibold mr-2 select-none">satria@toshiba-l645:~$</span>
+        <input
+          type="text"
+          id="term-input"
+          class="flex-1 bg-transparent text-white outline-none border-none focus:ring-0 p-0 text-xs font-mono placeholder:text-zinc-600"
+          placeholder="Try typing: 'docker ps', 'uptime', 'tunnel status', 'free -m', 'neofetch', or 'help'..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="text-[10px] text-zinc-500 ml-2 hidden sm:inline">Press Enter ↵</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════ LATENCY TEST DIAGNOSTIC MODAL ═══════════════ -->
+  <div id="modal-latency" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="w-full max-w-lg rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-2xl space-y-5 animate-in fade-in duration-200">
+      
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-white">Tunnel Latency & Jitter Diagnostic</h3>
+            <p class="text-[11px] font-mono text-zinc-400">Multi-Hop Path Analysis (CGNAT Bypass)</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-modal" class="text-zinc-400 hover:text-white p-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 font-mono text-xs">
+        <!-- Hop 1 -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-950 border border-zinc-800/80">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>1. Local Docker Bridge (172.18.0.1)</span>
+          </div>
+          <span class="text-emerald-400 font-bold" id="ping-hop-1">1.8 ms</span>
+        </div>
+
+        <!-- Hop 2 -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-950 border border-zinc-800/80">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>2. Bare-Metal Host Gateway (192.168.1.1)</span>
+          </div>
+          <span class="text-emerald-400 font-bold" id="ping-hop-2">3.2 ms</span>
+        </div>
+
+        <!-- Hop 3 -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-950 border border-zinc-800/80">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>3. Cloudflare Edge PoP (CGK - Jakarta)</span>
+          </div>
+          <span class="text-emerald-400 font-bold" id="ping-hop-3">17.6 ms</span>
+        </div>
+
+        <!-- Hop 4 -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-950 border border-zinc-800/80">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>4. End-to-End HTTPS Proxy via Tunnel</span>
+          </div>
+          <span class="text-emerald-400 font-bold" id="ping-hop-4">22.4 ms</span>
+        </div>
+      </div>
+
+      <!-- Diagnostic Results Summary -->
+      <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-300 space-y-1">
+        <div class="flex justify-between">
+          <span>Packet Loss:</span>
+          <span class="font-bold">0.0% (4/4 packets received)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Jitter:</span>
+          <span class="font-bold">± 1.2 ms</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Tunnel Protocol:</span>
+          <span class="font-bold">QUIC (HTTP/3 over UDP 7844)</span>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          id="btn-retest-latency"
+          class="px-4 py-2 text-xs font-mono rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
+        >
+          Re-test Latency
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="demo-toast" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-emerald-500/40 text-xs font-mono text-white shadow-xl transition-all duration-300 translate-y-16 opacity-0 pointer-events-none">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toast-message">Notification</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════ CLIENT-SIDE INTERACTIVITY SCRIPT ═══════════════ -->
+<script is:inline>
+  (function () {
+    // State
+    let isLiveStreaming = true;
+    let streamInterval = null;
+    let countdownInterval = null;
+    let countdownSeconds = 30;
+
+    // Architecture Node Definitions for Interactive Inspector
+    const nodeData = {
+      cgnat: {
+        tag: "INGRESS NODE",
+        tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        title: "Internet (CGNAT) ➔ Public Client Connection",
+        status: "Bypassed via Outbound QUIC",
+        protocol: "TLS 1.3 / HTTPS",
+        mechanics: "ISP assigns a private IP (100.64.0.0/10) to the router WAN, making port-forwarding impossible. The host creates an outbound-only tunnel to Cloudflare Edge PoP, eliminating the need for any static public IP or open firewall port.",
+        sslIssuer: "Let's Encrypt / CF Edge",
+        sslSubject: "*.satriaimaniar.my.id",
+        sslCipher: "TLS_AES_256_GCM_SHA384",
+        sslExpiry: "Auto-renews (82 days left)",
+        snippetTitle: "Network Topology / CGNAT Specification",
+        snippetBody: `ISP Architecture:
+  Carrier Grade NAT: 100.64.0.0/10 shared pool
+  Inbound Port Forwarding: BLOCKED by ISP Provider
+  Static Public IP: Not available / Not required
+Solution:
+  Outbound persistent WebSocket/QUIC tunnel to Cloudflare Edge PoP (CGK).
+  Public DNS records point directly to Cloudflare Anycast IPs.`
+      },
+      cloudflare: {
+        tag: "EDGE ZERO-TRUST",
+        tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        title: "Cloudflare Tunnel (Zero-Trust Edge)",
+        status: "Connected (CGK Datacenter)",
+        protocol: "QUIC (HTTP/3 over UDP)",
+        mechanics: "The cloudflared service on toshiba-l645 initiates multiple redundant duplex connections to Cloudflare Jakarta (CGK) edge servers. Traffic is authenticated, protected by WAF/DDoS shields, and routed over the tunnel without touching public NAT.",
+        sslIssuer: "Cloudflare Inc ECC CA-3",
+        sslSubject: "*.satriaimaniar.my.id",
+        sslCipher: "ECDHE-ECDSA-AES128-GCM-SHA256",
+        sslExpiry: "Edge Managed (Valid 2027)",
+        snippetTitle: "cloudflared / config.yml",
+        snippetBody: `tunnel: 7c89f2a1-e408-4e12-b18a-93f8d1c8f102
+credentials-file: /root/.cloudflared/7c89f2a1.json
+ingress:
+  - hostname: n8n.satriaimaniar.my.id
+    service: https://172.18.0.2:443
+    originRequest:
+      noTLSVerify: true
+  - hostname: homarr.satriaimaniar.my.id
+    service: https://172.18.0.2:443
+    originRequest:
+      noTLSVerify: true
+  - service: http_status:404`
+      },
+      nginx: {
+        tag: "INTERNAL REVERSE PROXY",
+        tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        title: "Nginx Proxy Manager (Reverse Proxy)",
+        status: "Active (Port 443 / 80 / 81)",
+        protocol: "HTTP/2 + WebSocket Upgrade",
+        mechanics: "Receives ingress streams from Cloudflare Tunnel. Inspects Host headers (SNI), performs SSL termination/offloading using Let's Encrypt Wildcard certificates, applies security headers (HSTS, CSP), and proxies traffic to Docker bridge networks.",
+        sslIssuer: "Let's Encrypt Authority X3",
+        sslSubject: "*.satriaimaniar.my.id",
+        sslCipher: "TLS_AES_256_GCM_SHA384",
+        sslExpiry: "Valid (Auto-Renew via DNS-01 Cloudflare Challenge)",
+        snippetTitle: "nginx / proxy_host / 1.conf",
+        snippetBody: `server {
+  listen 443 ssl http2;
+  server_name n8n.satriaimaniar.my.id;
+
+  ssl_certificate /etc/letsencrypt/live/npm-1/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/npm-1/privkey.pem;
+
+  location / {
+    proxy_pass http://172.18.0.5:5678;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+  }
+}`
+      },
+      docker: {
+        tag: "TARGET SERVICES STACK",
+        tagColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+        title: "Docker Containers Stack (172.18.0.0/16)",
+        status: "13 Containers Running",
+        protocol: "Internal TCP/HTTP Bridge",
+        mechanics: "All application containers (n8n, Homarr, Uptime Kuma) run in an isolated internal Docker bridge network without binding ports to 0.0.0.0 on the host machine. Only Nginx Proxy Manager is networked to communicate with them.",
+        sslIssuer: "Internal Bridge (Isolated)",
+        sslSubject: "dockernet_default (172.18.0.0/16)",
+        sslCipher: "Kernel Netfilter / iptables",
+        sslExpiry: "Persistent Bridge",
+        snippetTitle: "docker-compose.yml (Homelab Stack)",
+        snippetBody: `version: "3.8"
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    networks:
+      - dockernet
+    volumes:
+      - /opt/stacks/n8n:/home/node/.n8n
+
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    networks:
+      - dockernet
+
+networks:
+  dockernet:
+    external: true`
+      }
+    };
+
+    // Helper: Show Toast
+    function showToast(message) {
+      const toast = document.getElementById("demo-toast");
+      const msg = document.getElementById("toast-message");
+      if (!toast || !msg) return;
+      msg.textContent = message;
+      toast.classList.remove("translate-y-16", "opacity-0", "pointer-events-none");
+      setTimeout(() => {
+        toast.classList.add("translate-y-16", "opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+
+    // Architecture Node Card Click Handlers
+    const archCards = document.querySelectorAll(".arch-node-card");
+    archCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const nodeKey = card.getAttribute("data-node");
+        if (!nodeKey || !nodeData[nodeKey]) return;
+
+        // Update active card styling
+        archCards.forEach((c) => c.classList.remove("ring-2", "ring-emerald-500/40"));
+        card.classList.add("ring-2", "ring-emerald-500/40");
+
+        // Update Inspector
+        const data = nodeData[nodeKey];
+        const tagEl = document.getElementById("inspect-tag");
+        const titleEl = document.getElementById("inspect-title");
+        const statusEl = document.getElementById("inspect-status");
+        const protoEl = document.getElementById("inspect-protocol");
+        const mechEl = document.getElementById("inspect-mechanics");
+        const sslIssuerEl = document.getElementById("inspect-ssl-issuer");
+        const sslSubjEl = document.getElementById("inspect-ssl-subject");
+        const sslCiphEl = document.getElementById("inspect-ssl-cipher");
+        const sslExpEl = document.getElementById("inspect-ssl-expiry");
+        const snipTitleEl = document.getElementById("code-snippet-title");
+        const snipBodyEl = document.getElementById("code-snippet-body");
+
+        if (tagEl) {
+          tagEl.textContent = data.tag;
+          tagEl.className = "px-2 py-0.5 rounded text-xs font-mono " + data.tagColor;
+        }
+        if (titleEl) titleEl.textContent = data.title;
+        if (statusEl) statusEl.textContent = data.status;
+        if (protoEl) protoEl.textContent = data.protocol;
+        if (mechEl) mechEl.textContent = data.mechanics;
+        if (sslIssuerEl) sslIssuerEl.textContent = data.sslIssuer;
+        if (sslSubjEl) sslSubjEl.textContent = data.sslSubject;
+        if (sslCiphEl) sslCiphEl.textContent = data.sslCipher;
+        if (sslExpEl) sslExpEl.textContent = data.sslExpiry;
+        if (snipTitleEl) snipTitleEl.textContent = data.snippetTitle;
+        if (snipBodyEl) snipBodyEl.textContent = data.snippetBody;
+
+        showToast(`Inspecting: ${data.title}`);
+      });
+    });
+
+    // Copy Config Button
+    const copyConfigBtn = document.getElementById("btn-copy-config");
+    if (copyConfigBtn) {
+      copyConfigBtn.addEventListener("click", () => {
+        const codeEl = document.getElementById("code-snippet-body");
+        if (codeEl) {
+          navigator.clipboard.writeText(codeEl.textContent || "");
+          showToast("Configuration copied to clipboard!");
+        }
+      });
+    }
+
+    // Ping Service Button Handlers
+    const pingButtons = document.querySelectorAll(".btn-ping-service");
+    pingButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const service = btn.getAttribute("data-service");
+        const latencyEl = document.querySelector(`.service-latency[data-target="${service}"]`);
+        
+        // Visual feedback
+        btn.classList.add("opacity-60");
+        setTimeout(() => {
+          btn.classList.remove("opacity-60");
+          // Generate realistic jitter
+          let base = 12;
+          if (service === "npm") base = 11 + Math.floor(Math.random() * 4);
+          if (service === "docker") base = 3 + Math.floor(Math.random() * 2);
+          if (service === "n8n") base = 42 + Math.floor(Math.random() * 8);
+          if (service === "homarr") base = 5 + Math.floor(Math.random() * 3);
+          if (service === "cloudflare") base = 17 + Math.floor(Math.random() * 5);
+          if (service === "kuma") base = 4 + Math.floor(Math.random() * 3);
+
+          if (latencyEl) {
+            latencyEl.textContent = `${base}ms`;
+          }
+          btn.querySelector("span").textContent = `Ping (${base}ms)`;
+
+          // Append to log terminal
+          appendLogLine("kuma", `HEARTBEAT probe to ${service} returned 200 OK (${base}ms, jitter: ±0.8ms)`);
+          showToast(`Ping ${service}: ${base}ms (Healthy)`);
+        }, 400);
+      });
+    });
+
+    // Restart Service Button Handlers
+    const restartButtons = document.querySelectorAll(".btn-restart-service");
+    restartButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const service = btn.getAttribute("data-service");
+        const card = btn.closest(".p-5");
+        const badge = card ? card.querySelector(".service-status-badge") : null;
+
+        if (badge) {
+          badge.className = "service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20";
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> RELOADING';
+        }
+
+        appendLogLine("docker", `Graceful reload initiated for service [${service}] (SIGTERM sent, worker drain: 2s)`);
+        showToast(`Reloading service: ${service}...`);
+
+        setTimeout(() => {
+          if (badge) {
+            badge.className = "service-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> UP';
+          }
+          appendLogLine("docker", `Service [${service}] active and healthy (1 container restarted, PID fresh)`);
+          showToast(`Service ${service} restarted successfully.`);
+        }, 1400);
+      });
+    });
+
+    // Append Log Helper
+    const terminalBody = document.getElementById("terminal-body");
+    const autoscrollCheck = document.getElementById("chk-autoscroll");
+
+    function appendLogLine(source, text) {
+      if (!terminalBody) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(" ")[0];
+
+      const div = document.createElement("div");
+      div.className = "log-line";
+      div.setAttribute("data-source", source);
+
+      let tagColor = "text-emerald-400";
+      if (source === "cloudflared") tagColor = "text-cyan-400";
+      if (source === "docker") tagColor = "text-blue-400";
+      if (source === "n8n") tagColor = "text-rose-400";
+      if (source === "nginx") tagColor = "text-emerald-400";
+      if (source === "kuma") tagColor = "text-emerald-400";
+
+      div.innerHTML = `<span class="text-zinc-500">[${timeStr}]</span> <span class="${tagColor}">[${source}]</span> <span class="text-zinc-300">${text}</span>`;
+      terminalBody.appendChild(div);
+
+      if (autoscrollCheck && autoscrollCheck.checked) {
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      }
+    }
+
+    // Live Streaming Simulation (Logs & Resource Jitter)
+    const logTemplates = [
+      { source: "cloudflared", text: "Tunnel routing incoming request host=homarr.satriaimaniar.my.id -> http://172.18.0.4:7575 [200 OK]" },
+      { source: "nginx", text: "2026/11/06 23:10:32 [notice] 142#142: SSL handshake TLSv1.3 / TLS_AES_256_GCM_SHA384 client verified" },
+      { source: "docker", text: "Container n8n (e91bf4d13a94) health status: healthy, 0 errors in stream" },
+      { source: "kuma", text: "HEARTBEAT probe to https://status.satriaimaniar.my.id [200 OK] (5ms)" },
+      { source: "n8n", text: "Workflow [Daily-System-Telemetry-Check] executed successfully in 128ms" },
+      { source: "cloudflared", text: "INF Registered tunnel connection connIndex=1 location=SIN protocol=quic ip=198.41.200.194" },
+      { source: "docker", text: "Container uptime-kuma metrics collection completed (active_monitors=14)" }
+    ];
+
+     function runStreamTick() {
+      if (!isLiveStreaming) return;
+      
+      // Randomly pick a log entry
+      const randomLog = logTemplates[Math.floor(Math.random() * logTemplates.length)];
+      appendLogLine(randomLog.source, randomLog.text);
+
+      // Subtle resource jitter
+      const cpuVal = 17 + Math.floor(Math.random() * 6); // 17% - 22%
+      const cpuValEl = document.getElementById("metric-cpu-val");
+      const cpuBarEl = document.getElementById("bar-cpu");
+      if (cpuValEl) cpuValEl.textContent = `${cpuVal}%`;
+      if (cpuBarEl) cpuBarEl.style.width = `${cpuVal}%`;
+
+      // Core micro-bars
+      const c0 = 19 + Math.floor(Math.random() * 7);
+      const c1 = 15 + Math.floor(Math.random() * 6);
+      const c2 = 18 + Math.floor(Math.random() * 5);
+      const c3 = 16 + Math.floor(Math.random() * 6);
+      
+      const c0El = document.getElementById("c0-val");
+      const c0Bar = document.getElementById("c0-bar");
+      const c1El = document.getElementById("c1-val");
+      const c1Bar = document.getElementById("c1-bar");
+      const c2El = document.getElementById("c2-val");
+      const c2Bar = document.getElementById("c2-bar");
+      const c3El = document.getElementById("c3-val");
+      const c3Bar = document.getElementById("c3-bar");
+
+      if (c0El) c0El.textContent = `${c0}%`;
+      if (c0Bar) c0Bar.style.width = `${c0}%`;
+      if (c1El) c1El.textContent = `${c1}%`;
+      if (c1Bar) c1Bar.style.width = `${c1}%`;
+      if (c2El) c2El.textContent = `${c2}%`;
+      if (c2Bar) c2Bar.style.width = `${c2}%`;
+      if (c3El) c3El.textContent = `${c3}%`;
+      if (c3Bar) c3Bar.style.width = `${c3}%`;
+    }  
+
+    streamInterval = setInterval(runStreamTick, 4000);
+
+    // Countdown Timer for Sync
+    const countdownEl = document.getElementById("countdown-text");
+    countdownInterval = setInterval(() => {
+      countdownSeconds--;
+      if (countdownSeconds <= 0) {
+        countdownSeconds = 30;
+        appendLogLine("system", "Periodic cron telemetry sync completed. All 13 containers verified.");
+        const ticker = document.getElementById("ticker-text");
+        if (ticker) ticker.innerHTML = 'Last synced: <span class="text-zinc-200">just now</span>';
+      }
+      if (countdownEl) {
+        countdownEl.textContent = `refreshes in ${countdownSeconds}s`;
+      }
+    }, 1000); 
+
+    // Sync Now Button
+     const syncNowBtn = document.getElementById("btn-sync-now");
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener("click", () => {
+        countdownSeconds = 30;
+        runStreamTick();
+        appendLogLine("system", "Manual telemetry sync triggered by operator satria (host: toshiba-l645).");
+        showToast("Telemetry synced with bare-metal host!");
+      });
+    } 
+
+    // Toggle Live Stream Button
+    const toggleStreamBtn = document.getElementById("btn-toggle-stream");
+    const streamPulse = document.getElementById("stream-pulse");
+    const streamDot = document.getElementById("stream-dot");
+    const streamLabel = document.getElementById("stream-label");
+    const termStreamStatus = document.getElementById("terminal-stream-status");
+
+    if (toggleStreamBtn) {
+      toggleStreamBtn.addEventListener("click", () => {
+        isLiveStreaming = !isLiveStreaming;
+        if (isLiveStreaming) {
+          toggleStreamBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20";
+          if (streamPulse) streamPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+          if (streamDot) streamDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+          if (streamLabel) streamLabel.textContent = "LIVE";
+          if (termStreamStatus) termStreamStatus.textContent = "STREAMING";
+          showToast("Live stream resumed.");
+        } else {
+          toggleStreamBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white";
+          if (streamPulse) streamPulse.className = "hidden";
+          if (streamDot) streamDot.className = "relative inline-flex rounded-full h-2 w-2 bg-zinc-500";
+          if (streamLabel) streamLabel.textContent = "PAUSED";
+          if (termStreamStatus) termStreamStatus.textContent = "PAUSED";
+          showToast("Live stream paused.");
+        }
+      });
+    }
+
+    // Terminal Filter Buttons
+    const filterBtns = document.querySelectorAll(".log-filter-btn");
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach((b) => {
+          b.className = "log-filter-btn px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40";
+        });
+        btn.className = "log-filter-btn px-2.5 py-1 rounded bg-zinc-800 text-white font-medium";
+
+        const filter = btn.getAttribute("data-filter");
+        const lines = terminalBody ? terminalBody.querySelectorAll(".log-line") : [];
+        lines.forEach((line) => {
+          const src = line.getAttribute("data-source");
+          if (filter === "all" || src === filter) {
+            line.style.display = "";
+          } else {
+            line.style.display = "none";
+          }
+        });
+      });
+    });
+
+    // Clear Logs
+    const clearLogsBtn = document.getElementById("btn-clear-logs");
+    if (clearLogsBtn) {
+      clearLogsBtn.addEventListener("click", () => {
+        if (terminalBody) {
+          terminalBody.innerHTML = `<div class="log-line text-zinc-500">[System] Terminal buffer cleared. Awaiting events...</div>`;
+          showToast("Terminal buffer cleared.");
+        }
+      });
+    }
+
+    // Copy Logs
+    const copyLogsBtn = document.getElementById("btn-copy-logs");
+    if (copyLogsBtn) {
+      copyLogsBtn.addEventListener("click", () => {
+        if (terminalBody) {
+          navigator.clipboard.writeText(terminalBody.innerText);
+          showToast("Terminal logs copied to clipboard!");
+        }
+      });
+    }
+
+    // Interactive CLI Terminal Input
+    const termInput = document.getElementById("term-input");
+    if (termInput) {
+      termInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const cmd = termInput.value.trim().toLowerCase();
+          termInput.value = "";
+          if (!cmd) return;
+
+          // Echo user command
+          const echoDiv = document.createElement("div");
+          echoDiv.className = "log-line text-white font-bold";
+          echoDiv.innerHTML = `<span class="text-emerald-400">satria@toshiba-l645:~$</span> ${cmd}`;
+          terminalBody.appendChild(echoDiv);
+
+          // Command handling
+          if (cmd === "help") {
+            appendLogLine("system", "Available commands: docker ps, uptime, tunnel status, free -m, curl -I https://npm.home.lab, neofetch, clear");
+          } else if (cmd === "docker ps") {
+            const table = `CONTAINER ID   IMAGE                               STATUS          PORTS                     NAMES
+e91bf4d13a94   n8nio/n8n:latest                    Up 42 days      0.0.0.0:5678->5678/tcp   n8n-automation
+a47f8c021e5b   ghcr.io/ajnart/homarr:latest        Up 42 days      0.0.0.0:7575->7575/tcp   homarr-dashboard
+c39b1a84f091   jc21/nginx-proxy-manager:latest     Up 42 days      80/tcp, 443/tcp, 81/tcp  nginx-proxy-manager
+d28e71059f12   louislam/uptime-kuma:latest         Up 42 days      0.0.0.0:3001->3001/tcp   uptime-kuma
+8f1a9420dc14   cloudflare/cloudflared:latest       Up 42 days      tunnel-connector-quic    cloudflared-daemon
+(8 additional worker and cache containers active)`;
+            appendLogLine("docker", `<pre class="text-zinc-300 font-mono text-[11px] mt-1">${table}</pre>`);
+          } else if (cmd === "uptime") {
+            appendLogLine("system", "23:10:45 up 42 days, 18:24,  1 user,  load average: 0.19, 0.22, 0.25");
+          } else if (cmd === "tunnel status") {
+            appendLogLine("cloudflared", "Tunnel 7c89f2a1 active: 4 connections to CGK & SIN PoPs via QUIC (HTTP/3). 0 dropped packets.");
+          } else if (cmd === "free -m") {
+            const mem = `               total        used        free      shared  buff/cache   available
+Mem:            7854        3412        2814          84        1628        4120
+Swap:           4096         512        3584`;
+            appendLogLine("system", `<pre class="text-zinc-300 font-mono text-[11px] mt-1">${mem}</pre>`);
+          } else if (cmd.startsWith("curl")) {
+            const headers = `HTTP/2 200 
+server: openresty/1.21.4.1
+date: Fri, 06 Nov 2026 23:10:48 GMT
+content-type: text/html; charset=UTF-8
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+cf-cache-status: DYNAMIC
+cf-ray: 8df4a912c-CGK`;
+            appendLogLine("nginx", `<pre class="text-emerald-400 font-mono text-[11px] mt-1">${headers}</pre>`);
+          } else if (cmd === "neofetch") {
+            const neo = `       _,met$$$$$gg.          satria@toshiba-l645
+    ,g######kgk######g,       -------------------
+  ,m##################m,      OS: Ubuntu 22.04.4 LTS x86_64
+ :######################:     Host: Satellite L645 PSK0EL-01D00U
+ ####'     \`"######"     \`    Kernel: 5.15.0-107-generic
+ ####       #######      #    Uptime: 42 days, 18 hours, 24 mins
+ ####.     .######'     .     Packages: 1142 (dpkg), 13 (docker)
+  'm##################m'      Shell: bash 5.1.16
+    'g######kgk######g'       CPU: Intel Core i3 M 380 (4) @ 2.533GHz
+       '"met$$$$$gg"'         Memory: 3412MiB / 7854MiB (42.5%)`;
+            appendLogLine("system", `<pre class="text-zinc-300 font-mono text-[10px] mt-1 leading-tight">${neo}</pre>`);
+          } else if (cmd === "clear") {
+            terminalBody.innerHTML = "";
+          } else {
+            appendLogLine("system", `bash: ${cmd}: command not found. Type 'help' for available commands.`);
+          }
+
+          if (autoscrollCheck && autoscrollCheck.checked) {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+          }
+        }
+      });
+    }
+
+    // Diagnostic Latency Modal Logic
+    const testLatencyBtn = document.getElementById("btn-test-latency");
+    const latencyModal = document.getElementById("modal-latency");
+    const closeModalBtn = document.getElementById("btn-close-modal");
+    const retestBtn = document.getElementById("btn-retest-latency");
+
+    function runLatencyDiagnostic() {
+      const hop1 = document.getElementById("ping-hop-1");
+      const hop2 = document.getElementById("ping-hop-2");
+      const hop3 = document.getElementById("ping-hop-3");
+      const hop4 = document.getElementById("ping-hop-4");
+
+      if (hop1) hop1.textContent = "measuring...";
+      if (hop2) hop2.textContent = "measuring...";
+      if (hop3) hop3.textContent = "measuring...";
+      if (hop4) hop4.textContent = "measuring...";
+
+      setTimeout(() => {
+        if (hop1) hop1.textContent = `${(1.2 + Math.random() * 0.8).toFixed(1)} ms`;
+      }, 200);
+
+      setTimeout(() => {
+        if (hop2) hop2.textContent = `${(2.8 + Math.random() * 1.1).toFixed(1)} ms`;
+      }, 450);
+
+      setTimeout(() => {
+        if (hop3) hop3.textContent = `${(16.5 + Math.random() * 2.5).toFixed(1)} ms`;
+      }, 700);
+
+      setTimeout(() => {
+        if (hop4) hop4.textContent = `${(21.0 + Math.random() * 3.0).toFixed(1)} ms`;
+        showToast("Latency diagnostic completed: 0% packet loss.");
+      }, 950);
+    }
+
+    if (testLatencyBtn && latencyModal) {
+      testLatencyBtn.addEventListener("click", () => {
+        latencyModal.classList.remove("hidden");
+        runLatencyDiagnostic();
+      });
+    }
+
+    if (closeModalBtn && latencyModal) {
+      closeModalBtn.addEventListener("click", () => {
+        latencyModal.classList.add("hidden");
+      });
+    }
+
+    if (retestBtn) {
+      retestBtn.addEventListener("click", () => {
+        runLatencyDiagnostic();
+      });
+    }
+
+    // Close modal on backdrop click
+    if (latencyModal) {
+      latencyModal.addEventListener("click", (e) => {
+        if (e.target === latencyModal) {
+          latencyModal.classList.add("hidden");
+        }
+      });
+    }
+
+  })();
+</script>
+

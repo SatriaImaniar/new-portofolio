@@ -1,5 +1,13 @@
 ---
-// Live Infrastructure Status Widget — Telemetry & Observability
+// Live Infrastructure Status Widget — real telemetry from the home server
+const services = [
+  { id: "nginx", name: "Nginx Proxy", label: "reverse proxy" },
+  { id: "docker", name: "Docker Engine", label: "runtime" },
+  { id: "n8n", name: "n8n Workflow", label: "automation" },
+  { id: "homarr", name: "Homarr Hub", label: "dashboard" },
+  { id: "portfolio", name: "Portfolio Web", label: "web server" },
+  { id: "cloudflare", name: "Cloudflare", label: "tunnel" },
+];
 ---
 
 <section id="status" class="py-16 relative">
@@ -18,10 +26,10 @@
 
         <div class="flex items-center gap-2">
           <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-60" style="display:none"></span>
+            <span id="status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-zinc-400 dark:bg-zinc-600"></span>
           </span>
-          <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium" data-i18n="status.allHealthy">All Nodes Healthy</span>
+          <span id="status-text" class="text-xs font-mono text-zinc-500 font-medium">Connecting…</span>
         </div>
       </div>
 
@@ -40,13 +48,13 @@
                 <p class="font-medium text-sm text-zinc-900 dark:text-zinc-200 transition-colors" data-i18n="status.nodeTitle">Production Node: toshiba-l645</p>
                 <span class="inline-flex px-1.5 py-0.5 text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded">x86_64</span>
               </div>
-              <p class="text-xs text-zinc-500 font-mono mt-0.5" data-i18n="status.nodeSubtitle">Ubuntu 22.04 LTS &middot; Linux 5.15 &middot; Docker 24.0.7</p>
+              <p id="node-info" class="text-xs text-zinc-500 font-mono mt-0.5">—</p>
             </div>
           </div>
 
           <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-200 dark:border-zinc-800/60">
             <span class="text-xs text-zinc-500 font-mono" data-i18n="status.uptimeTitle">30-day Uptime</span>
-            <span class="text-xl font-semibold font-mono text-zinc-900 dark:text-zinc-200 transition-colors" id="uptime-display">99.7%</span>
+            <span class="text-xl font-semibold font-mono text-zinc-900 dark:text-zinc-200 transition-colors" id="uptime-display">—</span>
           </div>
         </div>
 
@@ -54,22 +62,15 @@
         <div class="mb-6">
           <div class="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-3" data-i18n="status.serviceHealth">Service Health Check</div>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="services-grid">
-            {[
-              { name: "Nginx Proxy", latency: "12ms", port: "443" },
-              { name: "Docker Engine", latency: "local", port: "2375" },
-              { name: "n8n Workflow", latency: "42ms", port: "5678" },
-              { name: "Homarr Hub", latency: "8ms", port: "7575" },
-              { name: "Cloudflare", latency: "18ms", port: "tunnel" },
-              { name: "Uptime Kuma", latency: "6ms", port: "3001" },
-            ].map((service) => (
-              <div class="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/60 transition-colors">
+            {services.map((s) => (
+              <div data-svc={s.id} class="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/60 transition-colors">
                 <div class="flex items-center justify-between mb-1.5">
-                  <span class="text-xs font-medium text-zinc-800 dark:text-zinc-300 truncate">{service.name}</span>
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span class="text-xs font-medium text-zinc-800 dark:text-zinc-300 truncate">{s.name}</span>
+                  <span data-dot class="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600"></span>
                 </div>
                 <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
-                  <span>{service.port}</span>
-                  <span class="text-zinc-700 dark:text-zinc-400 font-medium">{service.latency}</span>
+                  <span>{s.label}</span>
+                  <span data-ms class="text-zinc-700 dark:text-zinc-400 font-medium">—</span>
                 </div>
               </div>
             ))}
@@ -81,48 +82,48 @@
           <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
             <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
               <span data-i18n="status.cpu">CPU Core Load</span>
-              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="cpu-stat">21%</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="cpu-stat">—</span>
             </div>
             <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div id="cpu-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 21%;"></div>
+              <div id="cpu-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
           <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
             <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
               <span data-i18n="status.memory">Memory (RAM)</span>
-              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="ram-stat">3.2 / 8 GB</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="ram-stat">—</span>
             </div>
             <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div id="ram-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 40%;"></div>
+              <div id="ram-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
           <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
             <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
-              <span data-i18n="status.storage">NVMe Storage</span>
-              <span class="text-zinc-900 dark:text-zinc-200 font-medium">187 / 500 GB</span>
+              <span>SSD Storage</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="disk-stat">—</span>
             </div>
             <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full" style="width: 37%;"></div>
+              <div id="disk-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
           <div class="p-3.5 rounded-lg bg-zinc-50/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 transition-colors">
             <div class="flex items-center justify-between text-xs font-mono text-zinc-500 mb-1.5">
               <span data-i18n="status.containers">Containers</span>
-              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="containers-stat">12 active</span>
+              <span class="text-zinc-900 dark:text-zinc-200 font-medium" id="containers-stat">—</span>
             </div>
             <div class="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full" style="width: 80%;"></div>
+              <div id="containers-bar" class="h-full bg-zinc-800 dark:bg-zinc-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
         </div>
 
         <!-- Last Updated -->
         <div class="mt-5 flex items-center justify-between text-[11px] font-mono text-zinc-500">
-          <span data-i18n="status.polling">Polling interval: 30s &bull; Agent: active</span>
-          <span><span data-i18n="status.lastSync">Last sync:</span> <span id="last-updated" data-i18n="status.justNow">just now</span></span>
+          <span id="polling-text">Polling interval: 30s &bull; Agent: —</span>
+          <span><span data-i18n="status.lastSync">Last sync:</span> <span id="last-updated">—</span></span>
         </div>
       </div>
     </div>
@@ -130,33 +131,115 @@
 </section>
 
 <script>
-  function updateStats() {
-    const cpu = Math.floor(16 + Math.random() * 18);
-    const ramUsed = (3.1 + Math.random() * 0.4).toFixed(1);
-    const ramPercent = Math.round((parseFloat(ramUsed) / 8) * 100);
+  import { startTelemetry, type Telemetry } from "../lib/telemetry";
 
-    const cpuEl = document.getElementById("cpu-stat");
-    const cpuBar = document.getElementById("cpu-bar");
-    const ramEl = document.getElementById("ram-stat");
-    const ramBar = document.getElementById("ram-bar");
-    const containerEl = document.getElementById("containers-stat");
-    const lastEl = document.getElementById("last-updated");
+  type Tone = "up" | "down" | "off";
+  type Data = Telemetry & { containersTotal?: number | null };
 
-    const lang = document.documentElement.getAttribute("lang") || "en";
-    const activeLabel = lang === "id" ? "aktif" : "active";
+  // Class ditulis lengkap (jangan dirakit) supaya Tailwind ikut membundelnya
+  const DOT:  Record<Tone, string> = { up: "bg-emerald-500", down: "bg-red-500", off: "bg-zinc-400 dark:bg-zinc-600" };
+  const PING: Record<Tone, string> = { up: "bg-emerald-500", down: "bg-red-500", off: "bg-zinc-400" };
+  const TEXT: Record<Tone, string> = {
+    up: "text-emerald-600 dark:text-emerald-400",
+    down: "text-amber-600 dark:text-amber-400",
+    off: "text-zinc-500",
+  };
 
-    if (cpuEl) cpuEl.textContent = `${cpu}%`;
-    if (cpuBar) cpuBar.style.width = `${cpu}%`;
-    if (ramEl) ramEl.textContent = `${ramUsed} / 8 GB`;
-    if (ramBar) ramBar.style.width = `${ramPercent}%`;
-    if (containerEl) containerEl.textContent = `12 ${activeLabel}`;
-    if (lastEl) lastEl.textContent = new Date().toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  // Teks dinamis ditangani di sini (bukan data-i18n) supaya tidak ditimpa saat ganti bahasa
+  const T = {
+    en: { healthy: "All Nodes Healthy", degraded: "Degraded", offline: "Telemetry Offline", active: "active", agentOn: "active", agentOff: "unreachable", polling: "Polling interval: 30s" },
+    id: { healthy: "Semua Node Sehat", degraded: "Terganggu", offline: "Telemetri Offline", active: "aktif", agentOn: "aktif", agentOff: "tidak terjangkau", polling: "Interval polling: 30d" },
+  };
+  const lang = () => (document.documentElement.getAttribute("lang") === "id" ? "id" : "en");
+
+  const root = document.getElementById("status-widget");
+  const $ = (id: string) => document.getElementById(id);
+  const setText = (id: string, v: string) => { const el = $(id); if (el) el.textContent = v; };
+  const setBar = (id: string, pct: number) => {
+    const el = $(id);
+    if (el) el.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  };
+  const retone = (el: Element | null, map: Record<Tone, string>, tone: Tone) => {
+    if (!el) return;
+    Object.values(map).forEach((c) => el.classList.remove(...c.split(" ")));
+    el.classList.add(...map[tone].split(" "));
+  };
+
+  const setStatus = (tone: Tone, msg: string) => {
+    setText("status-text", msg);
+    retone($("status-text"), TEXT, tone);
+    retone($("status-dot"), DOT, tone);
+    const ping = $("status-ping");
+    if (ping) {
+      retone(ping, PING, tone);
+      ping.style.display = tone === "off" ? "none" : "";
+    }
+  };
+
+  const setCards = (d: Data | null) => {
+    root?.querySelectorAll<HTMLElement>("[data-svc]").forEach((card) => {
+      const s = d?.services.find((x) => x.id === card.dataset.svc);
+      const tone: Tone = !s ? "off" : s.up ? "up" : "down";
+      retone(card.querySelector("[data-dot]"), DOT, tone);
+      const ms = card.querySelector("[data-ms]");
+      if (ms) ms.textContent = !s ? "—" : s.up && s.ms != null ? `${s.ms}ms` : "down";
+    });
+  };
+
+  function render(d: Data) {
+    const t = T[lang()];
+    const total = d.services.length;
+    const down = d.services.filter((s) => !s.up).length;
+
+    setStatus(down === 0 ? "up" : "down", down === 0 ? t.healthy : `${t.degraded} (${down}/${total})`);
+
+    setText("node-info", [d.node.os, `Linux ${d.node.kernel}`, d.node.docker && `Docker ${d.node.docker}`]
+      .filter(Boolean).join(" · "));
+    setText("uptime-display", d.uptime30d == null ? "—" : `${d.uptime30d}%`);
+
+    setText("cpu-stat", `${d.cpu.percent}%`);
+    setBar("cpu-bar", d.cpu.percent);
+
+    setText("ram-stat", `${d.memory.usedGB} / ${d.memory.totalGB} GB`);
+    setBar("ram-bar", d.memory.percent);
+
+    setText("disk-stat", `${d.disk.usedGB} / ${d.disk.totalGB} GB`);
+    setBar("disk-bar", d.disk.percent);
+
+    const running = d.containers ?? 0;
+    const all = d.containersTotal ?? running;
+    setText("containers-stat", d.containers == null ? "—" : `${running} ${t.active}`);
+    setBar("containers-bar", all ? (running / all) * 100 : 0);
+
+    setCards(d);
+    setText("polling-text", `${t.polling} • Agent: ${t.agentOn}`);
+    setText("last-updated", new Date(d.updatedAt * 1000).toLocaleTimeString(
+      lang() === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
   }
 
-  updateStats();
-  setInterval(updateStats, 30000);
+  // Offline = tampilkan "—", BUKAN angka lama atau palsu
+  function offline() {
+    const t = T[lang()];
+    ["node-info", "uptime-display", "cpu-stat", "ram-stat", "disk-stat", "containers-stat", "last-updated"]
+      .forEach((id) => setText(id, "—"));
+    ["cpu-bar", "ram-bar", "disk-bar", "containers-bar"].forEach((id) => setBar(id, 0));
+    setCards(null);
+    setStatus("off", t.offline);
+    setText("polling-text", `${t.polling} • Agent: ${t.agentOff}`);
+  }
 
-  window.addEventListener("portfolio-lang-change", () => {
-    updateStats();
-  });
+  let state: "init" | "ok" | "off" = "init";
+  let last: Data | null = null;
+
+  if (root) {
+    startTelemetry(
+      (d) => { last = d as Data; state = "ok"; render(last); },
+      () => { state = "off"; offline(); },
+    );
+    // Ganti bahasa: gambar ulang dari data terakhir, tanpa fetch baru
+    window.addEventListener("portfolio-lang-change", () => {
+      if (state === "ok" && last) render(last);
+      else if (state === "off") offline();
+    });
+  }
 </script>
