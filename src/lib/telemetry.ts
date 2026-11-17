@@ -5,11 +5,12 @@ export type Telemetry = {
   node: { name: string; arch: string; os: string | null; kernel: string; docker: string | null };
   uptime30d: number | null;
   hostUptimeSec: number;
-  cpu: { percent: number; cores: number[]; load1: number };
+  cpu: { percent: number; cores: number[]; load1: number; tempC?: number | null };
   memory: { usedGB: number; totalGB: number; percent: number; cachedGB: number; availableGB: number };
   swap: { usedMB: number; totalGB: number };
   disk: { usedGB: number; totalGB: number; percent: number };
   containers: number | null;
+  containersTotal?: number | null;
   services: Svc[];
 };
 
